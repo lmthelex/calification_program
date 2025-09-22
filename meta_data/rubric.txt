@@ -1,0 +1,38 @@
+Puntaje
+01. [1.50]Apertura de archivo twitchdataTP.txt
+02. [1.50]Apertura de archivo Reporte.txt
+03. [0.50]Ingreso por teclado del rango de fechas
+04. [0.50]Ingreso por teclado de las dos tarifas
+05. [0.50]Lectura de la fecha adscrita a la plataforma
+06. [0.50]Condición de validación de fechas en rango ingresado
+07. [0.50]Lectura de código, seguidores, visitas y espectadores
+08. [1.00]Lectura e impresión del nombre
+09. [1.00]Lectura del detalle de los últimos streams
+10. [0.50]Descarte de línea por falla en la condición de validación
+11. [2.00]Convierte las fechas a entero y convierte el tiempo adecuadamente
+12. [1.00]Cálculo del tiempo de duración e ingresos por duración
+13. [0.50]Cálculo de la duración total de las reproducciones
+14. [0.50]Cálculo de ingresos por duración
+15. [0.50]Cálculo del total de reproducciones
+16. [0.50]Cálculo del ingreso por publicidad
+17. [1.00]Cálculo del engagement index
+18. [2.00]Cálculo de los totales para el resumen final del reporte
+19. [0.50]Impresión adecuada de los encabezados
+20. [0.50]Impresión adecuada de las fechas
+21. [0.50]Impresión de los datos del canal (no considera ni nombre ni fecha)
+22. [0.50]Impresión adecuada del tiempo
+23. [0.25]Impresión adecuada del detalle (no considera ni fecha ni tiempo)
+24. [0.75]Impresión adecuada del resumen por canal
+25. [1.00]Impresión adecuada del resumen final
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. La lectura de teclado no tiene los mensajes adecuados
+ 
