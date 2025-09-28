@@ -14,7 +14,9 @@
 class Rubric
 {
 private:
+    double achieved_score;
     string student_name;
+
     vector<Criterion> criteria;
     vector<Deduction> deductions;
     vector<Observation> general_observations;
@@ -22,30 +24,48 @@ private:
 
     //private methods
     void read_scored_block(ifstream &rubric_file);
+
     void read_unscored_block(ifstream &rubric_file);
 
     void read_student_name(ifstream &rubric_file);
+
     void read_evaluated_scored_block(ifstream &rubric_file);
+
     void read_evaluated_unscored_block(ifstream &rubric_file);
 
     Criterion *find_criteria(const string &id);
+
     Deduction *find_deduction(const string &id);
+
     Observation *find_observation(const string &id);
 
 public:
     //constructor
     Rubric()
-        : criteria(), deductions(), general_observations()
-    {}
+        : student_name("")
+        , achieved_score(0.0)
+        , criteria()
+        , deductions()
+        , general_observations() {}
+
     Rubric(const Rubric &other)
-           : criteria(other.criteria),
-             deductions(other.deductions),
-             general_observations(other.general_observations){}
+        : student_name("")
+        , achieved_score(0.0)
+        , criteria(other.criteria)
+        , deductions(other.deductions)
+        , general_observations(other.general_observations) {}
+
+    //getters and setters
+    string get_student_name() const;
+
+    double get_achieved_score() const;
+
     //public methods
     void read_rubric(ifstream &rubric_file);
-    void read_evaluated_rubric(ifstream &rubric_file);
-    void print(ofstream &evaluated_rubric);
 
+    void read_evaluated_rubric(ifstream &rubric_file);
+
+    void print(ofstream &evaluated_rubric, bool base_score);
 };
 
 #endif //LAB02_TP_RUBRIC_HPP

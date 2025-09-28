@@ -2,19 +2,22 @@
 
 int main()
 {
-    //open rubric file
+    string lab = "lab03";
+
+    //create a rubric
     ifstream rubric_file;
-
-    rubric_file = open_file_read("../meta_data/rubric.txt");
-
-    //open the base rubric
     Rubric rubric;
+
+    rubric_file = open_file_read("../meta_data/" + lab + "/rubric.txt");
     rubric.read_rubric(rubric_file);
 
-    //get the paths inside ../data/*
+    ofstream uwu("xd",ios::out); uwu.basic_ios<char>::rdbuf(std::cout.rdbuf());
+    rubric.print(uwu, true);
+    exit(1);
+    //get the paths inside ../data/labX/*
     try
     {
-        for (const auto &entry: directory_iterator("../data"))
+        for (const auto &entry: directory_iterator("../data/" + lab))
         {
             if (entry.is_directory())
             {
@@ -31,7 +34,9 @@ int main()
                 //create the final rubric for the student
                 Rubric evaluated_rubric(rubric);
                 evaluated_rubric.read_evaluated_rubric(evaluated_rubric_file);
-                evaluated_rubric.print(final_evaluated_rubric);
+                evaluated_rubric.print(final_evaluated_rubric, false);
+
+                cout << evaluated_rubric.get_achieved_score() << " - " << evaluated_rubric.get_student_name() << endl;
             }
         }
     }

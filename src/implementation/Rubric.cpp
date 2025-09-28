@@ -212,7 +212,16 @@ Observation * Rubric::find_observation(const string &id)
     return nullptr;
 }
 
+//getters and setters
+string Rubric::get_student_name() const
+{
+    return student_name;
+}
 
+double Rubric::get_achieved_score() const
+{
+    return achieved_score;
+}
 //public methods
 void Rubric::read_rubric(ifstream &rubric_file)
 {
@@ -229,7 +238,7 @@ void Rubric::read_evaluated_rubric(ifstream &rubric_file)
     read_evaluated_unscored_block(rubric_file);
 }
 
-void Rubric::print(ofstream &evaluated_rubric)
+void Rubric::print(ofstream &evaluated_rubric, bool base_score)
 {
     //header
     evaluated_rubric << "======================== RUBRICA ========================\n";
@@ -253,6 +262,10 @@ void Rubric::print(ofstream &evaluated_rubric)
     evaluated_rubric << string(80, '-') << "\n";
     evaluated_rubric << "Punta obtenido: " << total_achieved_score << "\n\n\n";
 
+    if (base_score)
+    {
+        evaluated_rubric << "Punta base: " << total_base_score << "\n\n\n";
+    }
 
     //deductions
     evaluated_rubric << "DESCUENTOS:\n";
@@ -285,6 +298,7 @@ void Rubric::print(ofstream &evaluated_rubric)
     evaluated_rubric << "\n";
 
     //footer
-    evaluated_rubric << "NOTA FINAL: " << total_achieved_score - total_achieved_deductions << endl;
+    achieved_score = total_achieved_score - total_achieved_deductions;
+    evaluated_rubric << "NOTA FINAL: " << achieved_score << endl;
     evaluated_rubric << "========================================================\n";
 }

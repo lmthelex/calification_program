@@ -1,0 +1,38 @@
+Puntaje
+01. [1.50]Apertura de los archivos Canales.txt, Etiquetas.txt y ReproduccionesDeEtiquetas.txt
+02. [0.50]Lectura de fecha - Canales.txt
+03. [0.50]Lectura de código - Canales.txt
+04. [1.00]Lectura e impresión de nombre - Canales.txt
+05. [0.25]Lectura de rating - Canales.txt
+06. [2.00]Lectura de etiqueta - Canales.txt
+07. [0.50]Lectura de etiqueta - Etiquetas.txt
+08. [1.00]Lectura e impresión de descripción - Etiquetas.txt
+09. [0.50]Lectura de duración  - Etiquetas.txt
+10. [0.50]Lectura de fecha - ReproduccionesDeEtiquetas.txt
+11. [1.00]Lectura de código del canal - ReproduccionesDeEtiquetas.txt
+12. [0.25]Lectura de etiqueta y reproducciones - ReproduccionesDeEtiquetas.txt
+13. [1.50]Búsqueda de la etiqueta leída en canales.txt en etiquetas.txt
+14. [2.50]Búsqueda de la etiqueta leída en canales.txt en reproducciones.txt
+15. [0.50]Conversión de fechas y horas a entero
+16. [0.50]Acumulación para calcular CANTIDAD DE REPRODUCCIONES
+17. [0.25]Acumulación para calcular TIEMPO TOTAL REPRODUCIDO
+18. [0.50]Cálculo de TIEMPO TOTAL DE REPRODUCCIONES DE ETIQUETAS
+19. [0.50]Cálculo de PORCENTAJE POR RATING DE CALIDAD
+20. [0.50]Cálculo de INGRESOS POR REPRODUCCIÓN DE ETIQUETAS 
+21. [0.75]Impresión de título y cabeceras
+22. [0.75]Impresión de datos de canal
+23. [0.75]Impresión de etiquetas reproducidas por canal
+24. [1.50]Impresión de resumen por canal
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, por esta ocasión no se le considera puntos en contra
+ 
