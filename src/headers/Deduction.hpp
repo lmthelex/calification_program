@@ -15,15 +15,14 @@ class Deduction : public Item
 
 public:
     //constructor and destructure
-    Deduction(string id, string description, double deduct_score)
+    Deduction(string id, string description, const double deduct_score)
         : Item(std::move(id), std::move(description))
         , base_deduct_score(deduct_score)
         , achieved_deduct_score(0.0) {}
-
     ~Deduction() override = default;
 
     //getters and setters
-    double set_achieved_deduct_score(double achieved_);
+    void set_achieved_deduct_score(double achieved_);
 
     double get_base_deduct_score() const;
 

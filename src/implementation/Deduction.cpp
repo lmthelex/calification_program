@@ -5,7 +5,7 @@
 #include "..\headers\Deduction.hpp"
 
 //getters and setters
-double Deduction::set_achieved_deduct_score(double achieved_)
+void Deduction::set_achieved_deduct_score(double achieved_)
 {
     achieved_deduct_score = achieved_;
 }

@@ -4,7 +4,7 @@ Puntaje
 03. [0.50]Lectura de código - Canales.txt
 04. [1.00]Lectura e impresión de nombre - Canales.txt
 05. [0.25]Lectura de rating - Canales.txt
-06. [2.00]Lectura de etiqueta - Canales.txt
+06. [2.00]Lectura de etiquetas por canal - Canales.txt
 07. [0.50]Lectura de etiqueta - Etiquetas.txt
 08. [1.00]Lectura e impresión de descripción - Etiquetas.txt
 09. [0.50]Lectura de duración  - Etiquetas.txt
@@ -35,4 +35,7 @@ f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas 
 Observaciones
 O1. Es una mala práctica sobrepasar los 80 caracteres por línea
 O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, por esta ocasión no se le considera puntos en contra
- 
+O3. Usted esta cerrando los archivos con el método close, si bien esto no está mal se le recuerda que estos métodos se ejecutan automáticamente incluso si usted no los llama explícitamente. Se menciona como comentario
+O4. En la función de búsqueda de reproducciones solo esta considerando que la etiqueta aparece una sola vez, realiza la lectura y ejecuta una instrucción break. Una misma etiqueta del mismo canal puede aparecer varias veces y se tiene que considerar dicho caso
+O5. En la función de búsqueda de etiquetas, una vez que encuentra la etiqueta en cuestión debería realizar un break para ya no seguir buscando
+O6. Su carpeta Bibliotecas se llama "src", si bien esto es un estándar, en el curso se indica expresamente que nombre esta carpeta como "Bibliotecas"

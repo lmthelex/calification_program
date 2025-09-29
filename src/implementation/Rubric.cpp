@@ -85,7 +85,7 @@ void Rubric::read_evaluated_scored_block(ifstream &rubric_file)
 {
     char character;
     string section;
-    rubric_file >> character;
+
     rubric_file >> section;
 
     while (true)
@@ -127,7 +127,7 @@ void Rubric::read_evaluated_scored_block(ifstream &rubric_file)
         }
         else if (section == "Descuentos")
         {
-            if (achieved_score == base_score or achieved_score  == 0.0)
+            if (base_score > achieved_score or achieved_score > 0 )
             {
                 cerr << "Error: Bad deduction in " << student_name << endl;
                 exit(0);
@@ -162,10 +162,10 @@ void Rubric::read_evaluated_unscored_block(ifstream &rubric_file)
             break;
         }
 
-        if (evaluated_observation[0] == 'O')
-        {
-            Observation *observation = find_observation(evaluated_observation + ".");
+        Observation *observation = find_observation(evaluated_observation + ".");
 
+        if (evaluated_observation[0] == 'O' and observation != nullptr)
+        {
             observations.push_back(*observation);
         }else
         {
@@ -232,7 +232,9 @@ void Rubric::read_rubric(ifstream &rubric_file)
 
 void Rubric::read_evaluated_rubric(ifstream &rubric_file)
 {
+    char character;
     read_student_name(rubric_file);
+    rubric_file >> character;
     read_evaluated_scored_block(rubric_file);
     read_evaluated_scored_block(rubric_file);
     read_evaluated_unscored_block(rubric_file);
@@ -298,7 +300,7 @@ void Rubric::print(ofstream &evaluated_rubric, bool base_score)
     evaluated_rubric << "\n";
 
     //footer
-    achieved_score = total_achieved_score - total_achieved_deductions;
+    achieved_score = total_achieved_score + total_achieved_deductions;
     evaluated_rubric << "NOTA FINAL: " << achieved_score << endl;
     evaluated_rubric << "========================================================\n";
 }

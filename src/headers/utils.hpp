@@ -6,6 +6,7 @@
 #define LAB02_TP_UTILS_HPP
 
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
