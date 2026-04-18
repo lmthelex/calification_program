@@ -1,0 +1,9 @@
+# ninja log v6
+19	1251	7982465865979870	CMakeFiles/lab02_tp.dir/src/implementation/read_functions.cpp.obj	3c419aa905dfa7a8
+13	1277	7982465865914707	CMakeFiles/lab02_tp.dir/src/implementation/Observation.cpp.obj	173679e9c406f5aa
+16	1282	7982465865949816	CMakeFiles/lab02_tp.dir/src/implementation/Item.cpp.obj	cd9db780b6ab8adb
+7	1296	7982465865864614	CMakeFiles/lab02_tp.dir/src/implementation/Criterion.cpp.obj	339b46f9a58ec128
+4	1300	7982465865832524	CMakeFiles/lab02_tp.dir/src/implementation/Deduction.cpp.obj	31b32a1059255d84
+10	1520	7982465865892658	CMakeFiles/lab02_tp.dir/src/implementation/Rubric.cpp.obj	ab05fe44e6edc43e
+1	1659	7982465865802527	CMakeFiles/lab02_tp.dir/src/main.cpp.obj	e2c21d747f50c5d4
+1659	1832	7982465882387697	lab02_tp.exe	ccb761ce390dfc7a

@@ -1,0 +1,48 @@
+
+
+Puntaje
+01. [1.00]Define la estructura Reproducción
+02. [1.00]Define la estructura Categoria
+03. [0.25]Abre el archivo correctamente “Categorias.csv” y emite el mensaje de error adecuado
+04. [0.50]Lee los datos del archivo “Categorias.csv”
+05. [0.75]Asignación de los 3 datos leidos al arrCategoria en la posición correspondiente
+06. [0.50]Reserva memoria para el arreglos dinámico de Categorias con 105 espacios
+07. [2.00]Imprime el 1er reporte de prueba de la zona roja con el formato especificado en el enunciado "ReporteDePruebaDeCategorias.txt"
+08. [0.25]Abre el archivo “StreamsReproducidos.csv” correctamente y emite el mensaje de error adecuado
+09. [0.50]Lee los datos del archivo “StreamsReproducidos.csv”
+10. [0.50]Realiza la búsqueda de la Categoría en una función independiente 
+11. [0.25]La búsqueda considera la posibilidad de que el dato no se encuentre
+12. [0.50]Asignación de los datos 2 leídos al arreglo reproducciones en la posición correspondiente
+13. [0.50]Reserva memoria para el arreglo dinámicos de Reproducciones
+14. [0.50]Actualiza el atributo numReproducciones en la Categoria correspondiente
+15. [2.00]Imprime el 2do reporte de prueba de la zona roja y zona azul con el formato especificado en el enunciado "ReporteDePruebaConReproducciones.txt"
+16. [3.00]Ordena los datos del arreglo ascendentemente por el nombre de la categoría.
+17. [1.00]Imprime el reporte de prueba ordenado "ReporteDePruebaOrdenado.txt"
+18. [0.25]Abre el archivo correctamente y emite el mensaje de error adecuado 
+19. [0.50]Lectura de los datos del archivo “ComentariosAlCanal.csv”
+20. [2.00]Realiza la busqueda de los canales en el atributo reproducciones de todo el arreglo Categorias 
+21. [0.75]Asignación de los datos leidos al arreglo  reproducciones en todas las posición correspondiente
+22. [0.50]Actualiza el atributo numComentarios en cada asignación
+23. [1.00]Imprime el 4to reporte de prueba de la zona roja, zona azul y zona verde con el formato especificado en el enunciado "ReporteDePruebaConComentarios.txt"
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+g. [-0.50]La carpeta Bibliotecas tiene un nombre diferente 
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, de no considerarlo su programa va a asignar donde no debe o de plano va a tener comportamientos inesperados.
+O3. Las estructuras no tienen los tipos de datos especificados en el enunciado o el nombre no es el indicado. Debe seguir las instrucciones al pie de la letra
+O6. No abre el archivo correctamente y no emite el mensaje de error adecuado
+O7. Alguno de sus reportes esta mal alineado o no cumple con el nombre especificado
+O8. La impresión de los reportes debe ser siempre con la misma función
+O9. No realiza copias en cada asignación de los comentarios en categorías diferente. Por lo que todos sus punteros están apuntando al mismo espacio de memoria. Este paso es importante debido a que si se desea hacer modificaciones en un comentario de una reproduccion especifica, al apuntar todos al mismo sitio, el cambio se reflejará en todas las reproducciones con ese comentario
+O10. No realiza la búsqueda en cada canal. O sea, hace una búsqueda secuenciaL y se queda con la primera coincidencia, añadiendo el comentario unicamente a la primera coincidencia cuando se le indico que debió ser a todas las coincidencias
+O11. Esta realizando copias dinámicas innecesarias en la lectura de categoría o reproduction. A la hora de leer crea un puntero a memoria dinámica y luego copia ese puntero a su asignación, esto es un desperdicio. Pudo simplemente asignar el puntero leído y ya. Debe evitar esto a toda costa siempre que sea responsable de su memoria
+O13. No inicializa el contador de numComentarios o numReproducciones en 0. Sin esto su programa tiene mucha probabilidad de caerse en tiempo de ejecución
+O14. Su función de ordenamiento no funciona correctamente, por lo que el reporte tampoco esta ordenado. No se asigna puntaje

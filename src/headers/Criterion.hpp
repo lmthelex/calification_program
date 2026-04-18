@@ -29,6 +29,7 @@ public:
 
     //methods
     void print(ofstream &file) const override;
+    void uwu();
 };
 
 #endif //LAB02_TP_CRITERION_HPP

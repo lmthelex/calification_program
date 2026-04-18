@@ -1,0 +1,40 @@
+Puntaje
+01. [1.50]Define estructura Categoría en un archivo independiente con todos los campos y tipos de datos correctos.
+02. [0.50]Define estructura Nodo en un archivo independiente con todos los campos y tipos de datos correctos.
+03. [0.25]Apertura y validación de apertura de archivo Categorias.csv
+04. [0.75]Lectura de los datos del archivo Categorias.csv
+05. [1.00]Asigna los datos a la Categoría a insertar, inicializando los campos que no se llenaron
+06. [2.00]Inserción ordenada de las estructuras Categoría a a lista ligada
+07. [0.25]Apertura y validación de apertura de archivo ReporteDePruebaDeCategorias.txt
+08. [0.25]Sigue el formato del enunciado en ReporteDePruebaDeCategorias.txt
+09. [1.50]Impresión de los datos de la categoría, indicados en la zona roja en ReporteDePruebaDeCategorias.txt
+10. [0.25]Apertura y validación de apertura de archivo  StreamsReproducidos.csv
+11. [0.75]Lectura de los datos del archivo StreamsReproducidos.csv
+12. [1.50]Busca en la lista la categoría a actualizar con los datos leídos
+13. [1.50]Actualiza los campos de la categoría con los datos leídos, sin calcular aún el campo promedioDropoff
+14. [0.50]Recorre la lista correctamente, categoría por categoría
+15. [1.50]Calcula el promedio de las tasas de drop-off de cada categoría usando los campos correspondientes
+16. [0.25]Apertura y validación de apertura de archivo ReporteDeCategoriasCompleto.txt
+17. [0.25]Sigue el formato del enunciado en ReporteDeCategoriasCompleto.txt
+18. [1.00]Impresión de los datos de la categoría y las reproducciones en ReporteDeCategoriasCompleto.txt
+19. [1.00]Identifica correctamente las categorías con promedioDropOff < 3.5
+20. [3.00]Elimina los nodos correspondientes, manejando correctamente los casos inicio/medio/fin
+21. [0.50]Impresión del reporte ReporteDeCategoriasEliminados.txt usando la misma función
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+g. [-0.50]La carpeta Bibliotecas tiene un nombre diferente 
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. No esta leyendo adecuadamente los datos de Categorias.csv o de StreamsReproducidos.csv
+O3. Esta realizando copias dinámicas innecesarias en la lectura de cadenas de caracteres. A la hora de leer crea un puntero a memoria dinámica y luego copia ese puntero a su asignación, esto es un desperdicio. Pudo simplemente asignar el puntero leído y ya. Debe evitar esto a toda costa siempre que sea responsable de su memoria
+O4. Alguno de sus reportes esta mal alineado, no tiene el titulo correspondiente o no cumple con el nombre especificado
+O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, de no considerarlo su programa va a asignar donde no debe o de plano va a tener comportamientos inesperados.
+O3. Las estructuras no tienen los tipos de datos especificados en el enunciado o el nombre no es el indicado. Debe seguir las instrucciones al pie de la letra
+O6. No abre el archivo correctamente y no emite el mensaje de error adecuado

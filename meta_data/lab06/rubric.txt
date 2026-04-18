@@ -1,0 +1,30 @@
+Puntaje
+01. [1.00]Lectura del archivo Categoria.txt
+02. [1.00]Asigna los dato leídos de Categoria.txt a arreglos
+03. [1.00]Genera reporte de prueba para Categorias.txt
+04. [1.50]Lectura del archivo StreamsReproducidos.txt
+05. [1.50]Asigna los datos leídos de StreamsReproducidos.txt a arreglos
+06. [1.50]Genera reporte de prueba para StreamsReproducidos.txt
+07. [2.50]Genera "nombreArch" dentro de generaArchivoEnlace y es capaz de usarlo después
+08. [2.50]Genera "enlace" dentro de generaArchivoEnlace y es capaz de usarlo después
+09. [1.00]Define los arreglos con el prefijo "arr" (8 en total)
+10. [1.50]Crea un reporte por cada llamada a generaArchivoEnlace
+11. [3.00]Realiza la búsqueda de streams para colocarlo en el reporte
+12. [2.00]Realiza el promedio de rating, drop-off y duración total por cada reporte
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+g. [-0.50]La carpeta Bibliotecas tiene un nombre diferente 
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, por esta ocasión no se le considera puntos en contra
+O3. Usted esta cerrando los archivos con el método close, si bien esto no está mal se le recuerda que estos métodos se ejecutan automáticamente incluso si usted no los llama explícitamente. Se menciona como comentario
+O6. Su carpeta Bibliotecas se llama "src", si bien esto es un estándar, en el curso se indica expresamente que nombre esta carpeta como "Bibliotecas"
+O7. Su programa esta declarando memoria dinámica para nombArch y enlace pero nunca libera la memoria asignada. Esto es una mala práctica. Usted es responsable de administrar bien su memoria. No se le baja puntaje por esto  pero se lo menciona
+O8. Su reporte de prueba de streams no esta correctamente alineado

@@ -2,7 +2,7 @@
 
 int main()
 {
-    string lab = "lab03/";
+    string lab = "lab09/";
 
     //create a rubric
     ifstream rubric_file;

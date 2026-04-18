@@ -143,35 +143,12 @@ foreach ($d in $dirs) {
         continue
     }
 
-    # Build rubric body exactly as requested (blank lines between items)
+    # Build rubric body exactly as requested (blank lines between items) 
     $body = @"
-Alumno:
+Alumno: $studentLine
 -
 Puntaje
-01. [1.50]
-02. [0.50]
-03. [0.50]
-04. [1.00]
-05. [0.25]
-06. [2.00]
-07. [0.50]
-08. [1.00]
-09. [0.50]
-10. [0.50]
-11. [1.00]
-12. [0.25]
-13. [1.50]
-14. [2.50]
-15. [0.50]
-16. [0.50]
-17. [0.25]
-18. [0.50]
-19. [0.50]
-20. [0.50]
-21. [0.75]
-22. [0.75]
-23. [0.75]
-24. [1.50]
+{Axel tiene que rellenar los criterios aqui}
 -
 Descuentos
 a. [-3.00] 0.00

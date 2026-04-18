@@ -1,0 +1,44 @@
+[
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\main.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\main.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\main.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\main.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\Deduction.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Deduction.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Deduction.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\Deduction.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\Criterion.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Criterion.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Criterion.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\Criterion.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\Rubric.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Rubric.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Rubric.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\Rubric.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\Observation.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Observation.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Observation.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\Observation.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\Item.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Item.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\Item.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\Item.cpp.obj"
+},
+{
+  "directory": "C:/Users/lmthelex/Documents/lab02_tp/build",
+  "command": "D:\\Strawberry\\c\\bin\\g++.exe -g -std=gnu++20 -o CMakeFiles\\lab02_tp.dir\\src\\implementation\\read_functions.cpp.obj -c C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\read_functions.cpp",
+  "file": "C:\\Users\\lmthelex\\Documents\\lab02_tp\\src\\implementation\\read_functions.cpp",
+  "output": "CMakeFiles\\lab02_tp.dir\\src\\implementation\\read_functions.cpp.obj"
+}
+]

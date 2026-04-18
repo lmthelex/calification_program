@@ -14,7 +14,7 @@ Puntaje
 13. [1.50]Búsqueda de la etiqueta leída en canales.txt en etiquetas.txt
 14. [2.50]Búsqueda de la etiqueta leída en canales.txt en reproducciones.txt
 15. [0.50]Conversión de fechas y horas a entero
-16. [0.50]Acumulación para calcular CANTIDAD DE REPRODUCCIONES
+16. [0.50]Lectura por teclado de la tarifa
 17. [0.25]Acumulación para calcular TIEMPO TOTAL REPRODUCIDO
 18. [0.50]Cálculo de TIEMPO TOTAL DE REPRODUCCIONES DE ETIQUETAS
 19. [0.50]Cálculo de PORCENTAJE POR RATING DE CALIDAD
@@ -31,6 +31,7 @@ c. [-0.50]No coloca la descripción del programa
 d. [-1.00]Funciones de más de 40 lineas de código
 e. [-0.25]No valida la apertura del archivo
 f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+g. [-0.50]La carpeta Bibliotecas tiene un nombre diferente 
 -
 Observaciones
 O1. Es una mala práctica sobrepasar los 80 caracteres por línea
@@ -39,3 +40,4 @@ O3. Usted esta cerrando los archivos con el método close, si bien esto no está
 O4. En la función de búsqueda de reproducciones solo esta considerando que la etiqueta aparece una sola vez, realiza la lectura y ejecuta una instrucción break. Una misma etiqueta del mismo canal puede aparecer varias veces y se tiene que considerar dicho caso
 O5. En la función de búsqueda de etiquetas, una vez que encuentra la etiqueta en cuestión debería realizar un break para ya no seguir buscando
 O6. Su carpeta Bibliotecas se llama "src", si bien esto es un estándar, en el curso se indica expresamente que nombre esta carpeta como "Bibliotecas"
+O7. No realiza la lectura por teclado de la tarifa

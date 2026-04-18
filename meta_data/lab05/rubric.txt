@@ -1,0 +1,32 @@
+Puntaje
+01. [0.25]Apertura del archivo streams.txt
+02. [1.00]Lectura del archvio streams.txt
+03. [2.75]Asignación ordenada en los arreglos
+04. [1.00]Reporte de prueba de streams.txt
+05. [0.25]Apertura del archivo canales.txt
+06. [1.75]Lectura del archivo canales.txt
+07. [3.00]Realiza la busqueda binaria por código de stream
+08. [1.00]Calcula los promedios y el total reproducciones
+09. [0.50]Calcula la fecha más antigua de reproducción del stream
+10. [0.50]Calcula la fecha más reciente de reproducción del stream
+11. [0.50]Calcula el stream con mayor duración
+12. [0.50]Calcula el stream con menor duración
+13. [3.00]Reporte solicitado en el enunciado
+14. [3.00]Ordenacion por categoría y drop-off
+15. [1.00]Reporte modificado sin repetir código
+-
+Descuentos
+a. [-3.00]Nombre incorrecto de la carpeta ZIP
+b. [-2.00]Nombre incorrecto del proyecto de CLion
+c. [-0.50]No coloca la descripción del programa
+d. [-1.00]Funciones de más de 40 lineas de código
+e. [-0.25]No valida la apertura del archivo
+f. [-1.00]Si no se considera el fin de línea para salir del bucle de etiquetas en Canales.txt
+g. [-0.50]La carpeta Bibliotecas tiene un nombre diferente 
+-
+Observaciones
+O1. Es una mala práctica sobrepasar los 80 caracteres por línea
+O2. Considere que la búsqueda debe soporta el caso de que no se encuentre el dato, por esta ocasión no se le considera puntos en contra
+O3. Usted esta cerrando los archivos con el método close, si bien esto no está mal se le recuerda que estos métodos se ejecutan automáticamente incluso si usted no los llama explícitamente. Se menciona como comentario
+O6. Su carpeta Bibliotecas se llama "src", si bien esto es un estándar, en el curso se indica expresamente que nombre esta carpeta como "Bibliotecas"
+
