@@ -13,7 +13,7 @@ ___
 
 
 The template for the 3-create_rubrics.ps1 must look like this
-@"
+```text
 Alumno: $studentLine
 -
 Puntaje
@@ -29,4 +29,4 @@ f. [-1.00] 0.00
 -
 Observaciones
 
-"@
+```
