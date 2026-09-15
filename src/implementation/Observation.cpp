@@ -2,10 +2,10 @@
 // Created by lmthelex on 21/09/2025.
 //
 
-#include "..\headers\Observation.hpp"
+#include "../headers/Observation.hpp"
 
 //methods
-void Observation::print(ofstream &file) const
+void Observation::print(ostream &file) const
 {
     file << string(5, ' ') << description << "\n";
 }

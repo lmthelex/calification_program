@@ -2,15 +2,20 @@
 // Created by lmthelex on 21/09/2025.
 //
 
-#include "..\headers\Item.hpp"
+#include "../headers/Item.hpp"
 
 //getters and setters
-string Item::get_id()
+const string &Item::get_id() const
 {
     return id;
 }
 
-string Item::get_description()
+const string &Item::get_description() const
 {
     return description;
+}
+
+void Item::set_description(string description_)
+{
+    description = std::move(description_);
 }

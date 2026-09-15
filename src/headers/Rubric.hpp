@@ -2,70 +2,52 @@
 // Created by lmthelex on 21/09/2025.
 //
 
-#ifndef LAB02_TP_RUBRIC_HPP
-#define LAB02_TP_RUBRIC_HPP
+#ifndef CALIFICATION_PROGRAM_RUBRIC_HPP
+#define CALIFICATION_PROGRAM_RUBRIC_HPP
 
 #include "Criterion.hpp"
 #include "Deduction.hpp"
 #include "Observation.hpp"
-#include "read_functions.hpp"
 #include "utils.hpp"
 
 class Rubric
 {
 private:
-    double achieved_score;
     string student_name;
-
     vector<Criterion> criteria;
     vector<Deduction> deductions;
-    vector<Observation> general_observations;
     vector<Observation> observations;
 
-    //private methods
-    void read_scored_block(ifstream &rubric_file);
-
-    void read_unscored_block(ifstream &rubric_file);
-
-    void read_student_name(ifstream &rubric_file);
-
-    void read_evaluated_scored_block(ifstream &rubric_file);
-
-    void read_evaluated_unscored_block(ifstream &rubric_file);
-
-    Criterion *find_criteria(const string &id);
-
-    Deduction *find_deduction(const string &id);
-
-    Observation *find_observation(const string &id);
-
 public:
-    //constructor
-    Rubric()
-        : student_name("")
-        , achieved_score(0.0)
-        , criteria()
-        , deductions()
-        , general_observations() {}
-
-    Rubric(const Rubric &other)
-        : student_name("")
-        , achieved_score(0.0)
-        , criteria(other.criteria)
-        , deductions(other.deductions)
-        , general_observations(other.general_observations) {}
+    Rubric() = default;
+    Rubric(const Rubric &) = default;
+    Rubric &operator=(const Rubric &) = default;
 
     //getters and setters
-    string get_student_name() const;
-
+    const string &get_student_name() const;
+    void set_student_name(string student_name_);
+    double get_base_score() const;
     double get_achieved_score() const;
+    const vector<Criterion> &get_criteria() const;
+    const vector<Deduction> &get_deductions() const;
+    const vector<Observation> &get_observations() const;
+    Criterion *find_criterion(const string &id);
+    Deduction *find_deduction(const string &id);
 
-    //public methods
-    void read_rubric(ifstream &rubric_file);
+    //state
+    bool has_any_calification() const;
+    bool is_ready() const;
 
-    void read_evaluated_rubric(ifstream &rubric_file);
+    //input and output
+    void read_rubric(istream &rubric_file);
+    void read_raw_note(istream &raw_note_file);
+    void write_raw_note(ostream &raw_note_file) const;
+    void print(ostream &output) const;
+    void print_feedback(ostream &output) const;
 
-    void print(ofstream &evaluated_rubric, bool base_score);
+    //observations selected for one student
+    void add_observation(const Observation &observation);
+    void refresh_observations(const vector<Observation> &general_observations);
 };
 
-#endif //LAB02_TP_RUBRIC_HPP
+#endif //CALIFICATION_PROGRAM_RUBRIC_HPP

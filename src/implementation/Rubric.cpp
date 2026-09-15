@@ -1,188 +1,200 @@
-//
-// Created by lmthelex on 21/09/2025.
-//
+#include "../headers/Rubric.hpp"
 
-#include "..\headers\Rubric.hpp"
-
-//methods
-void Rubric::read_scored_block(ifstream &rubric_file)
+namespace
 {
-    string section;
-
-    rubric_file >> section;
-
-    while (true)
+string trim(const string &value)
+{
+    const auto first = find_if_not(value.begin(), value.end(), [](unsigned char c)
     {
-        string id;
+        return isspace(c);
+    });
+    const auto last = find_if_not(value.rbegin(), value.rend(), [](unsigned char c)
+    {
+        return isspace(c);
+    }).base();
 
-        rubric_file >> id;
-
-        if (id == "-")
-        {
-            break;
-        }
-
-        char character;
-        double score;
-        string description;
-
-        rubric_file >> character;
-        rubric_file >> score;
-        rubric_file >> character;
-        getline(rubric_file, description);
-
-        if (section == "Puntaje")
-        {
-            Criterion criterion(id, description, score);
-            criteria.push_back(criterion);
-        }
-        else if (section == "Descuentos")
-        {
-            Deduction deduction(id, description, score);
-            deductions.push_back(deduction);
-        }
+    if (first >= last)
+    {
+        return "";
     }
+    return string(first, last);
 }
 
-void Rubric::read_unscored_block(ifstream &rubric_file)
+string normalize_id(string id)
 {
-    string section;
-
-    rubric_file >> section;
-
-    while (true)
+    id = trim(id);
+    while (!id.empty() and (id.back() == '.' or id.back() == ';'))
     {
-        string id;
-
-        rubric_file >> id;
-
-        if (rubric_file.eof())
-        {
-            break;
-        }
-
-        char character;
-        double score;
-        string description;
-
-        getline(rubric_file, description);
-
-        Observation observation(id, description);
-        general_observations.push_back(observation);
+        id.pop_back();
     }
+    return id;
 }
 
-
-void Rubric::read_student_name(ifstream &rubric_file)
+double parse_number(const string &text, const string &context)
 {
-    string section, name;
+    const string value = trim(text);
+    size_t read = 0;
+    double number = 0.0;
 
-    rubric_file >> section;
-    getline(rubric_file, student_name);
-}
-
-void Rubric::read_evaluated_scored_block(ifstream &rubric_file)
-{
-    char character;
-    string section;
-
-    rubric_file >> section;
-
-    while (true)
+    try
     {
-        string id;
-
-        rubric_file >> id;
-
-        if (id == "-")
-        {
-            break;
-        }
-
-        double base_score, achieved_score;
-
-        rubric_file >> character;
-        rubric_file >> base_score;
-        rubric_file >> character;
-        rubric_file >> achieved_score;
-
-        if (section == "Puntaje")
-        {
-            if (achieved_score > base_score)
-            {
-                cerr << "Error: Bad calification in " << student_name << endl;
-                cerr << "\t in crteria with id: " << id << endl;
-                exit(0);
-            }
-
-            if (Criterion *founded_criteria = find_criteria(id))
-            {
-                founded_criteria->set_achieved_score(achieved_score);
-            }
-            else
-            {
-                cerr << "Error: Bad criteria " << id << endl;
-                exit(0);
-            }
-        }
-        else if (section == "Descuentos")
-        {
-            if (base_score > achieved_score or achieved_score > 0 )
-            {
-                cerr << "Error: Bad deduction in " << student_name << endl;
-                exit(0);
-            }
-            if (Deduction *founded_deduction = find_deduction(id))
-            {
-                founded_deduction->set_achieved_deduct_score(achieved_score);
-            }
-            else
-            {
-                cerr << "Error: Bad criteria " << id << endl;
-                exit(0);
-            }
-        }
+        number = stod(value, &read);
     }
-}
-
-void Rubric::read_evaluated_unscored_block(ifstream &rubric_file)
-{
-    string section;
-
-    rubric_file >> section >> ws;
-
-    while (true)
+    catch (const exception &)
     {
-        string evaluated_observation;
-
-        getline(rubric_file, evaluated_observation);
-
-        if (rubric_file.eof())
-        {
-            break;
-        }
-
-        Observation *observation = find_observation(evaluated_observation + ".");
-
-        if (evaluated_observation[0] == 'O' and observation != nullptr)
-        {
-            observations.push_back(*observation);
-        }else
-        {
-            Observation observation("-", evaluated_observation);
-
-            observations.push_back(observation);
-        }
+        throw runtime_error("Invalid number in " + context + ": \"" + value + "\"");
     }
+
+    if (read != value.size() or !isfinite(number))
+    {
+        throw runtime_error("Invalid number in " + context + ": \"" + value + "\"");
+    }
+    return number;
 }
 
-Criterion *Rubric::find_criteria(const string &id)
+double parse_bracketed_score(string score, const string &context)
 {
-    for (auto &c: criteria)
+    score = trim(score);
+    if (score.size() < 3 or score.front() != '[' or score.back() != ']')
     {
-        if (c.get_id() == id)
+        throw runtime_error("Expected a score in brackets in " + context);
+    }
+    return parse_number(score.substr(1, score.size() - 2), context);
+}
+
+struct RubricLine
+{
+    string id;
+    double base_score;
+    string description;
+};
+
+RubricLine parse_rubric_line(const string &line, size_t line_number)
+{
+    const string context = "rubric line " + to_string(line_number);
+    const auto first_separator = line.find(';');
+
+    if (first_separator != string::npos)
+    {
+        const auto second_separator = line.find(';', first_separator + 1);
+        if (second_separator == string::npos)
         {
-            return &c;
+            throw runtime_error("Malformed semicolon-delimited " + context);
+        }
+
+        const string id = normalize_id(line.substr(0, first_separator));
+        const double score = parse_bracketed_score(
+                line.substr(first_separator + 1,
+                            second_separator - first_separator - 1), context);
+        const string description = trim(line.substr(second_separator + 1));
+        if (id.empty() or description.empty())
+        {
+            throw runtime_error("Missing id or description in " + context);
+        }
+        return {id, score, description};
+    }
+
+    const auto open_bracket = line.find('[');
+    const auto close_bracket = line.find(']', open_bracket);
+    if (open_bracket == string::npos or close_bracket == string::npos)
+    {
+        throw runtime_error("Malformed " + context);
+    }
+
+    const string id = normalize_id(line.substr(0, open_bracket));
+    const double score = parse_bracketed_score(
+            line.substr(open_bracket, close_bracket - open_bracket + 1), context);
+    const string description = trim(line.substr(close_bracket + 1));
+    if (id.empty() or description.empty())
+    {
+        throw runtime_error("Missing id or description in " + context);
+    }
+    return {id, score, description};
+}
+
+vector<string> split_scored_raw_line(const string &line, size_t line_number)
+{
+    vector<string> fields;
+    size_t begin = 0;
+
+    for (int separator = 0; separator < 3; ++separator)
+    {
+        const auto position = line.find(';', begin);
+        if (position == string::npos)
+        {
+            throw runtime_error("Malformed raw_note.txt line " +
+                                to_string(line_number));
+        }
+        fields.push_back(trim(line.substr(begin, position - begin)));
+        begin = position + 1;
+    }
+    fields.push_back(trim(line.substr(begin)));
+    return fields;
+}
+
+string display_id(const string &id)
+{
+    return id + ".";
+}
+}
+
+const string &Rubric::get_student_name() const
+{
+    return student_name;
+}
+
+void Rubric::set_student_name(string student_name_)
+{
+    student_name = std::move(student_name_);
+}
+
+double Rubric::get_base_score() const
+{
+    double total = 0.0;
+    for (const auto &criterion: criteria)
+    {
+        total += criterion.get_base_score();
+    }
+    return total;
+}
+
+double Rubric::get_achieved_score() const
+{
+    double total = 0.0;
+    for (const auto &criterion: criteria)
+    {
+        total += criterion.get_achieved_score();
+    }
+    for (const auto &deduction: deductions)
+    {
+        total += deduction.get_achieved_deduct_score();
+    }
+    return total;
+}
+
+const vector<Criterion> &Rubric::get_criteria() const
+{
+    return criteria;
+}
+
+const vector<Deduction> &Rubric::get_deductions() const
+{
+    return deductions;
+}
+
+const vector<Observation> &Rubric::get_observations() const
+{
+    return observations;
+}
+
+Criterion *Rubric::find_criterion(const string &id)
+{
+    const string wanted = normalize_id(id);
+    for (auto &criterion: criteria)
+    {
+        if (criterion.get_id() == wanted)
+        {
+            return &criterion;
         }
     }
     return nullptr;
@@ -190,117 +202,395 @@ Criterion *Rubric::find_criteria(const string &id)
 
 Deduction *Rubric::find_deduction(const string &id)
 {
-    for (auto &c: deductions)
+    const string wanted = normalize_id(id);
+    for (auto &deduction: deductions)
     {
-        if (c.get_id() == id)
+        if (deduction.get_id() == wanted)
         {
-            return &c;
+            return &deduction;
         }
     }
     return nullptr;
 }
 
-Observation * Rubric::find_observation(const string &id)
+bool Rubric::has_any_calification() const
 {
-    for (auto &c: general_observations)
+    const bool has_criterion = any_of(criteria.begin(), criteria.end(),
+                                      [](const Criterion &criterion)
     {
-        if (c.get_id() == id)
+        return criterion.has_achieved_score();
+    });
+    const bool has_deduction = any_of(deductions.begin(), deductions.end(),
+                                      [](const Deduction &deduction)
+    {
+        return deduction.has_achieved_deduct_score();
+    });
+    return has_criterion or has_deduction or !observations.empty();
+}
+
+bool Rubric::is_ready() const
+{
+    return !criteria.empty() and all_of(criteria.begin(), criteria.end(),
+                                        [](const Criterion &criterion)
+    {
+        return criterion.has_achieved_score();
+    });
+}
+
+void Rubric::read_rubric(istream &rubric_file)
+{
+    criteria.clear();
+    deductions.clear();
+    observations.clear();
+    student_name.clear();
+
+    enum class Section { NONE, CRITERIA, DEDUCTIONS, OBSERVATIONS };
+    Section section = Section::NONE;
+    bool found_criteria_section = false;
+    bool found_deductions_section = false;
+    unordered_set<string> criterion_ids;
+    unordered_set<string> deduction_ids;
+    string line;
+    size_t line_number = 0;
+
+    while (getline(rubric_file, line))
+    {
+        ++line_number;
+        if (!line.empty() and line.back() == '\r')
         {
-            return &c;
+            line.pop_back();
+        }
+        if (line_number == 1 and line.rfind("\xEF\xBB\xBF", 0) == 0)
+        {
+            line.erase(0, 3);
+        }
+        line = trim(line);
+        if (line.empty() or line == "-")
+        {
+            continue;
+        }
+        if (line == "Puntaje")
+        {
+            section = Section::CRITERIA;
+            found_criteria_section = true;
+            continue;
+        }
+        if (line == "Descuentos")
+        {
+            section = Section::DEDUCTIONS;
+            found_deductions_section = true;
+            continue;
+        }
+        if (line == "Observaciones")
+        {
+            section = Section::OBSERVATIONS;
+            continue;
+        }
+        if (section == Section::NONE)
+        {
+            throw runtime_error("Unexpected content on rubric line " +
+                                to_string(line_number));
+        }
+        if (section == Section::OBSERVATIONS)
+        {
+            continue;
+        }
+
+        RubricLine item = parse_rubric_line(line, line_number);
+        if (section == Section::CRITERIA)
+        {
+            if (item.base_score < 0.0)
+            {
+                throw runtime_error("Criterion " + item.id +
+                                    " cannot have a negative base score");
+            }
+            if (!criterion_ids.insert(item.id).second)
+            {
+                throw runtime_error("Duplicate criterion id: " + item.id);
+            }
+            criteria.emplace_back(item.id, item.description, item.base_score);
+        }
+        else
+        {
+            if (item.base_score > 0.0)
+            {
+                throw runtime_error("Deduction " + item.id +
+                                    " cannot have a positive base score");
+            }
+            if (!deduction_ids.insert(item.id).second)
+            {
+                throw runtime_error("Duplicate deduction id: " + item.id);
+            }
+            deductions.emplace_back(item.id, item.description, item.base_score);
         }
     }
-    return nullptr;
-}
 
-//getters and setters
-string Rubric::get_student_name() const
-{
-    return student_name;
-}
-
-double Rubric::get_achieved_score() const
-{
-    return achieved_score;
-}
-//public methods
-void Rubric::read_rubric(ifstream &rubric_file)
-{
-    read_scored_block(rubric_file);
-    read_scored_block(rubric_file);
-    read_unscored_block(rubric_file);
-}
-
-void Rubric::read_evaluated_rubric(ifstream &rubric_file)
-{
-    char character;
-    read_student_name(rubric_file);
-    rubric_file >> character;
-    read_evaluated_scored_block(rubric_file);
-    read_evaluated_scored_block(rubric_file);
-    read_evaluated_unscored_block(rubric_file);
-}
-
-void Rubric::print(ofstream &evaluated_rubric, bool base_score)
-{
-    //header
-    evaluated_rubric << "======================== RUBRICA ========================\n";
-    evaluated_rubric << student_name << "\n";
-    //criteria
-    evaluated_rubric << "\nCRITERIOS:\n";
-    evaluated_rubric << string(80, '=') << "\n";
-
-    evaluated_rubric << left << setw(6) << "ID" << right << setw(10) << "Base"
-            << right << setw(10) << "Obtenido" << string(5, ' ') << "Description\n";
-    evaluated_rubric << string(80, '-') << "\n";
-
-    double total_base_score = 0.0, total_achieved_score = 0.0;
-    for (const auto &c: criteria)
+    if (!rubric_file.eof() or !found_criteria_section or
+        !found_deductions_section or criteria.empty())
     {
-        c.print(evaluated_rubric);
-        total_base_score += c.get_base_score();
-        total_achieved_score += c.get_achieved_score();
+        throw runtime_error("The rubric is incomplete or could not be read");
+    }
+    if (abs(get_base_score() - 20.0) > 0.0001)
+    {
+        ostringstream message;
+        message << fixed << setprecision(2)
+                << "Rubric criteria total must be 20.00, but is "
+                << get_base_score();
+        throw runtime_error(message.str());
+    }
+}
+
+void Rubric::read_raw_note(istream &raw_note_file)
+{
+    for (auto &criterion: criteria)
+    {
+        criterion.clear_achieved_score();
+    }
+    for (auto &deduction: deductions)
+    {
+        deduction.clear_achieved_deduct_score();
+    }
+    observations.clear();
+
+    enum class Section { NONE, CRITERIA, DEDUCTIONS, OBSERVATIONS };
+    Section section = Section::NONE;
+    unordered_set<string> read_criteria;
+    unordered_set<string> read_deductions;
+    string line;
+    size_t line_number = 0;
+
+    while (getline(raw_note_file, line))
+    {
+        ++line_number;
+        if (!line.empty() and line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        const string stripped = trim(line);
+        if (stripped.empty())
+        {
+            continue;
+        }
+        if (stripped == "Puntaje")
+        {
+            section = Section::CRITERIA;
+            continue;
+        }
+        if (stripped == "Descuentos")
+        {
+            section = Section::DEDUCTIONS;
+            continue;
+        }
+        if (stripped == "Observaciones")
+        {
+            section = Section::OBSERVATIONS;
+            continue;
+        }
+        if (section == Section::NONE)
+        {
+            throw runtime_error("Unexpected content in raw_note.txt line " +
+                                to_string(line_number));
+        }
+
+        if (section == Section::OBSERVATIONS)
+        {
+            const auto separator = line.find(';');
+            if (separator == string::npos)
+            {
+                observations.emplace_back("", stripped);
+            }
+            else
+            {
+                observations.emplace_back(
+                        normalize_id(line.substr(0, separator)),
+                        trim(line.substr(separator + 1)));
+            }
+            continue;
+        }
+
+        const vector<string> fields = split_scored_raw_line(line, line_number);
+        const string id = normalize_id(fields[0]);
+        const double raw_base = parse_bracketed_score(
+                fields[1], "raw_note.txt line " + to_string(line_number));
+        if (section == Section::CRITERIA)
+        {
+            Criterion *criterion = find_criterion(id);
+            if (criterion == nullptr)
+            {
+                throw runtime_error("Unknown criterion in raw_note.txt: " + id);
+            }
+            if (!read_criteria.insert(id).second)
+            {
+                throw runtime_error("Duplicate criterion in raw_note.txt: " + id);
+            }
+            if (abs(raw_base - criterion->get_base_score()) > 0.0001)
+            {
+                throw runtime_error("Base score changed for criterion " + id);
+            }
+            if (!fields[2].empty())
+            {
+                criterion->set_achieved_score(parse_number(
+                        fields[2], "criterion " + id + " in raw_note.txt"));
+            }
+        }
+        else
+        {
+            Deduction *deduction = find_deduction(id);
+            if (deduction == nullptr)
+            {
+                throw runtime_error("Unknown deduction in raw_note.txt: " + id);
+            }
+            if (!read_deductions.insert(id).second)
+            {
+                throw runtime_error("Duplicate deduction in raw_note.txt: " + id);
+            }
+            if (abs(raw_base - deduction->get_base_deduct_score()) > 0.0001)
+            {
+                throw runtime_error("Base score changed for deduction " + id);
+            }
+            if (!fields[2].empty())
+            {
+                deduction->set_achieved_deduct_score(parse_number(
+                        fields[2], "deduction " + id + " in raw_note.txt"));
+            }
+        }
     }
 
-    evaluated_rubric << string(80, '-') << "\n";
-    evaluated_rubric << "Punta obtenido: " << total_achieved_score << "\n\n\n";
-
-    if (base_score)
+    if (!raw_note_file.eof())
     {
-        evaluated_rubric << "Punta base: " << total_base_score << "\n\n\n";
+        throw runtime_error("Could not read raw_note.txt");
+    }
+}
+
+void Rubric::write_raw_note(ostream &raw_note_file) const
+{
+    raw_note_file << "Puntaje\n";
+    for (const auto &criterion: criteria)
+    {
+        raw_note_file << criterion.get_id() << ";[" << fixed << setprecision(2)
+                      << criterion.get_base_score() << "];";
+        if (criterion.has_achieved_score())
+        {
+            raw_note_file << fixed << setprecision(2)
+                          << criterion.get_achieved_score();
+        }
+        raw_note_file << ";" << criterion.get_description() << "\n";
     }
 
-    //deductions
-    evaluated_rubric << "DESCUENTOS:\n";
-    evaluated_rubric << string(80, '=') << "\n";
-
-    evaluated_rubric << left << setw(6) << "ID" << right << setw(10) << "Base"
-            << right << setw(10) << "Descontado" << string(5, ' ') << "Description\n";
-    evaluated_rubric << string(80, '-') << "\n";
-
-    double total_achieved_deductions = 0.0;
-    for (const auto &d: deductions)
+    raw_note_file << "Descuentos\n";
+    for (const auto &deduction: deductions)
     {
-        d.print(evaluated_rubric);
-        total_achieved_deductions += d.get_achieved_deduct_score();
+        raw_note_file << deduction.get_id() << ";[" << fixed << setprecision(2)
+                      << deduction.get_base_deduct_score() << "];";
+        if (deduction.has_achieved_deduct_score())
+        {
+            raw_note_file << fixed << setprecision(2)
+                          << deduction.get_achieved_deduct_score();
+        }
+        raw_note_file << ";" << deduction.get_description() << "\n";
     }
 
-    evaluated_rubric << string(80, '-') << "\n";
-    evaluated_rubric << "Descuentos obtenido: " << total_achieved_deductions << "\n\n\n";
-
-    //observations
-    evaluated_rubric << "OBSERVACIONES:\n";
-    evaluated_rubric << string(80, '=') << "\n";
-
-    for (const auto &o: observations)
+    raw_note_file << "Observaciones\n";
+    for (const auto &observation: observations)
     {
-        o.print(evaluated_rubric);
+        raw_note_file << observation.get_id() << ";"
+                      << observation.get_description() << "\n";
     }
+}
 
-    evaluated_rubric << string(80, '-') << "\n";
-    evaluated_rubric << "\n";
+void Rubric::print(ostream &output) const
+{
+    for (const auto &criterion: criteria)
+    {
+        output << display_id(criterion.get_id()) << " [" << fixed
+               << setprecision(2) << criterion.get_base_score() << "]"
+               << criterion.get_description() << "\n";
+    }
+    output << "\nTotal: " << fixed << setprecision(2) << get_base_score() << "\n";
+}
 
-    //footer
-    achieved_score = total_achieved_score + total_achieved_deductions;
-    evaluated_rubric << "NOTA FINAL: " << achieved_score << endl;
-    evaluated_rubric << "========================================================\n";
+void Rubric::print_feedback(ostream &output) const
+{
+    output << "======================== RUBRICA ========================\n";
+    output << "Alumno: " << student_name << "\n\n";
+    output << "CRITERIOS:\n" << string(100, '=') << "\n";
+    output << left << setw(8) << "ID" << right << setw(10) << "Base"
+           << setw(12) << "Obtenido" << string(5, ' ')
+           << left << "Descripcion\n" << string(100, '-') << "\n";
+
+    double criteria_total = 0.0;
+    for (const auto &criterion: criteria)
+    {
+        criterion.print(output);
+        criteria_total += criterion.get_achieved_score();
+    }
+    output << string(100, '-') << "\n";
+    output << "Puntaje obtenido: " << fixed << setprecision(2)
+           << criteria_total << "\n\n";
+
+    output << "DESCUENTOS:\n" << string(100, '=') << "\n";
+    output << left << setw(8) << "ID" << right << setw(10) << "Base"
+           << setw(12) << "Descontado" << string(5, ' ')
+           << left << "Descripcion\n" << string(100, '-') << "\n";
+
+    double deduction_total = 0.0;
+    for (const auto &deduction: deductions)
+    {
+        deduction.print(output);
+        deduction_total += deduction.get_achieved_deduct_score();
+    }
+    output << string(100, '-') << "\n";
+    output << "Descuentos obtenidos: " << fixed << setprecision(2)
+           << deduction_total << "\n\n";
+
+    output << "OBSERVACIONES:\n" << string(100, '=') << "\n";
+    for (const auto &observation: observations)
+    {
+        observation.print(output);
+    }
+    output << string(100, '-') << "\n\n";
+    output << "NOTA FINAL: " << fixed << setprecision(2)
+           << get_achieved_score() << "\n";
+    output << "========================================================\n";
+}
+
+void Rubric::add_observation(const Observation &observation)
+{
+    const bool already_registered = any_of(
+            observations.begin(), observations.end(),
+            [&observation](const Observation &current)
+    {
+        if (!observation.get_id().empty())
+        {
+            return current.get_id() == observation.get_id();
+        }
+        return current.get_id().empty() and
+               current.get_description() == observation.get_description();
+    });
+    if (!already_registered)
+    {
+        observations.push_back(observation);
+    }
+}
+
+void Rubric::refresh_observations(
+        const vector<Observation> &general_observations)
+{
+    for (auto &registered: observations)
+    {
+        if (registered.get_id().empty())
+        {
+            continue;
+        }
+        const auto found = find_if(
+                general_observations.begin(), general_observations.end(),
+                [&registered](const Observation &general)
+        {
+            return general.get_id() == registered.get_id();
+        });
+        if (found != general_observations.end())
+        {
+            registered.set_description(found->get_description());
+        }
+    }
 }

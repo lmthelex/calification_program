@@ -12,12 +12,12 @@ class Observation : public Item
 {
 public:
     //constructor and destructure
-    Observation(string id, string description)
-        : Item(std::move(id), std::move(description)) {};
+    Observation(string id_, string description_)
+        : Item(std::move(id_), std::move(description_)) {};
     ~Observation() override = default;
 
     //methods
-    void print(ofstream &file) const override;
+    void print(ostream &file) const override;
 
 };
 #endif //LAB02_TP_OBSERVATION_HPP

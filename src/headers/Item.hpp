@@ -15,17 +15,18 @@ protected:
 
 public:
     //constructor and destructure
-    Item(string id, string description)
-        : id(std::move(id))
-        , description(std::move(description)) {};
+    Item(string id_, string description_)
+        : id(std::move(id_))
+        , description(std::move(description_)) {};
     virtual ~Item() = default;
 
     //getters and setters
-    virtual string get_id();
-    virtual string get_description();
+    const string &get_id() const;
+    const string &get_description() const;
+    void set_description(string description_);
 
     //methods
-    virtual void print(ofstream &file) const = 0;
+    virtual void print(ostream &file) const = 0;
 };
 
 #endif //LAB02_TP_ITEM_HPP

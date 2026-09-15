@@ -1,59 +1,25 @@
-#include "headers\Rubric.hpp"
+#include "headers/CalificationProgram.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
-    string lab = "lab09/";
+    if (argc != 3 or string(argv[1]) != "--eval")
+    {
+        cerr << "Usage: calification_program --eval <course/lab>\n";
+        return 1;
+    }
 
-    //create a rubric
-    ifstream rubric_file;
-    Rubric rubric;
-
-    rubric_file = open_file_read("../meta_data/" + lab + "rubric.txt");
-    rubric.read_rubric(rubric_file);
-
-    /*
-     * Execute to verify the base score of the rubric
-    ofstream uwu("xd",ios::out);
-    uwu.basic_ios<char>::rdbuf(std::cout.rdbuf());
-    rubric.print(uwu, true);
-    exit(1);
-    */
-
-    //get the paths inside ../data/labX/*
     try
     {
-        for (const auto &entry: directory_iterator("../data/" + lab))
-        {
-            if (entry.is_directory())
-            {
-                //open the evaluated rubric file
-                ifstream evaluated_rubric_file;
-                ofstream final_evaluated_rubric;
-                string student_path = entry.path().filename().string(), input_path, output_path;
-
-                input_path = "../data/" + lab + "/" + student_path + "/" + student_path + "_rubric.txt";
-                output_path = "../data/" + lab + "/" + student_path + "/" + student_path + "_final_rubric.txt";
-                evaluated_rubric_file = open_file_read(input_path);
-                final_evaluated_rubric = open_file_write(output_path);
-
-                //create the final rubric for the student
-                Rubric evaluated_rubric(rubric);
-                evaluated_rubric.read_evaluated_rubric(evaluated_rubric_file);
-                evaluated_rubric.print(final_evaluated_rubric, false);
-
-                cout << setw(2) << floor(evaluated_rubric.get_achieved_score() + 0.5) <<
-                    " - " << evaluated_rubric.get_achieved_score() << " - " << evaluated_rubric.get_student_name() << endl;
-            }
-        }
+        const string evaluation_name = argv[2];
+        CalificationProgram program(
+                evaluation_name, resolve_lab_folder(evaluation_name));
+        program.run();
     }
-    catch (const filesystem_error &e)
+    catch (const exception &error)
     {
-        cerr << "Filesystem error: " << e.what() << endl;
+        cerr << "Error: " << error.what() << "\n";
+        return 1;
     }
-    catch (const exception &e)
-    {
-        cerr << "General error: " << e.what() << endl;
-    }
-
+    
     return 0;
 }

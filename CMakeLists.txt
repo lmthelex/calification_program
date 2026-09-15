@@ -1,9 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
-project(lab02_tp)
+project(calification_program)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(lab02_tp src/main.cpp
+add_executable(calification_program src/main.cpp
+        src/implementation/CalificationProgram.cpp
+        src/headers/CalificationProgram.hpp
+        src/implementation/PdfWriter.cpp
+        src/headers/PdfWriter.hpp
+        src/implementation/Student.cpp
+        src/headers/Student.hpp
         src/implementation/Deduction.cpp
         src/headers/Deduction.hpp
         src/implementation/Criterion.cpp
@@ -14,6 +22,4 @@ add_executable(lab02_tp src/main.cpp
         src/headers/Observation.hpp
         src/implementation/Item.cpp
         src/headers/Item.hpp
-        src/headers/utils.hpp
-        src/implementation/read_functions.cpp
-        src/headers/read_functions.hpp)
+        src/headers/utils.hpp)

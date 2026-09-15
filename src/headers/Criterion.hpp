@@ -12,24 +12,25 @@ class Criterion : public Item
 {
 protected:
     double base_score;
-    double achieved_score;
+    optional<double> achieved_score;
 
 public:
     //constructor and destructure
-    Criterion(string id, string description, const double base_score)
-        : Item(std::move(id), std::move(description))
-        , base_score(base_score)
-        , achieved_score(0.0) {};
+    Criterion(string id_, string description_, const double base_score_)
+        : Item(std::move(id_), std::move(description_))
+        , base_score(base_score_)
+        , achieved_score(nullopt) {};
     ~Criterion() override = default;
 
     //getters and setters
     void set_achieved_score(double achieved_);
+    void clear_achieved_score();
     double get_base_score() const;
     double get_achieved_score() const;
+    bool has_achieved_score() const;
 
     //methods
-    void print(ofstream &file) const override;
-    void uwu();
+    void print(ostream &file) const override;
 };
 
 #endif //LAB02_TP_CRITERION_HPP
