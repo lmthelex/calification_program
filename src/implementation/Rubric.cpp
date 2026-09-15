@@ -512,7 +512,7 @@ void Rubric::read_raw_note(istream &raw_note_file)
             }
             if (!fields[2].empty())
             {
-                criterion->set_achieved_score(parse_number(
+                criterion->restore_achieved_score(parse_number(
                         fields[2], "criterion " + id + " in raw_note.txt"));
             }
         }
@@ -533,7 +533,7 @@ void Rubric::read_raw_note(istream &raw_note_file)
             }
             if (!fields[2].empty())
             {
-                deduction->set_achieved_deduct_score(parse_number(
+                deduction->restore_achieved_deduct_score(parse_number(
                         fields[2], "deduction " + id + " in raw_note.txt"));
             }
         }

@@ -24,6 +24,7 @@ public:
 
     //getters and setters
     void set_achieved_score(double achieved_);
+    void restore_achieved_score(double achieved_);
     void clear_achieved_score();
     double get_base_score() const;
     double get_achieved_score() const;

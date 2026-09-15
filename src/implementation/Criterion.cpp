@@ -14,6 +14,15 @@ void Criterion::set_achieved_score(double achieved_)
     achieved_score = achieved_;
 }
 
+void Criterion::restore_achieved_score(double achieved_)
+{
+    if (!isfinite(achieved_))
+    {
+        throw invalid_argument("Stored criterion score must be finite");
+    }
+    achieved_score = achieved_;
+}
+
 void Criterion::clear_achieved_score()
 {
     achieved_score.reset();

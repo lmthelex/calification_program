@@ -70,6 +70,23 @@ vector<Observation>::const_iterator find_observation(
         return observation.get_id() == id;
     });
 }
+
+string normalize_rubric_id(string id)
+{
+    id = trim(id);
+    while (!id.empty() and id.back() == '.')
+    {
+        id.pop_back();
+    }
+    return id;
+}
+
+string bracketed_score(double score)
+{
+    ostringstream output;
+    output << "[" << fixed << setprecision(2) << score << "]";
+    return output.str();
+}
 }
 
 CalificationProgram::CalificationProgram(string evaluation_name_, path lab_folder_,
@@ -80,6 +97,7 @@ CalificationProgram::CalificationProgram(string evaluation_name_, path lab_folde
     , report_width(report_width_)
 {
     load_rubric();
+    synchronize_raw_notes();
 }
 
 void CalificationProgram::load_rubric()
@@ -97,6 +115,158 @@ void CalificationProgram::load_rubric()
         throw runtime_error("Could not open " + rubric_path.string());
     }
     rubric.read_rubric(input);
+}
+
+void CalificationProgram::synchronize_raw_notes()
+{
+    const path projects_folder = lab_folder / "projects";
+    if (!is_directory(projects_folder))
+    {
+        return;
+    }
+
+    for (const auto &entry: recursive_directory_iterator(
+            projects_folder, directory_options::skip_permission_denied))
+    {
+        if (entry.is_regular_file() and entry.path().filename() == "raw_note.txt")
+        {
+            synchronize_raw_note(entry.path());
+        }
+    }
+}
+
+void CalificationProgram::synchronize_raw_note(const path &raw_note_path) const
+{
+    ifstream input(raw_note_path, ios::binary);
+    if (!input.is_open())
+    {
+        throw runtime_error("Could not open " + raw_note_path.string());
+    }
+    ostringstream input_buffer;
+    input_buffer << input.rdbuf();
+    if (!input.eof() and input.fail())
+    {
+        throw runtime_error("Could not read " + raw_note_path.string());
+    }
+    const string original = input_buffer.str();
+    string synchronized;
+    synchronized.reserve(original.size());
+
+    enum class Section { NONE, CRITERIA, DEDUCTIONS, OBSERVATIONS };
+    Section section = Section::NONE;
+    size_t line_begin = 0;
+
+    while (line_begin < original.size())
+    {
+        const size_t newline = original.find('\n', line_begin);
+        const bool has_newline = newline != string::npos;
+        const size_t line_end = has_newline ? newline : original.size();
+        string line = original.substr(line_begin, line_end - line_begin);
+        string comparable = line;
+        if (!comparable.empty() and comparable.back() == '\r')
+        {
+            comparable.pop_back();
+        }
+        comparable = trim(comparable);
+
+        if (comparable == "Puntaje")
+        {
+            section = Section::CRITERIA;
+        }
+        else if (comparable == "Descuentos")
+        {
+            section = Section::DEDUCTIONS;
+        }
+        else if (comparable == "Observaciones")
+        {
+            section = Section::OBSERVATIONS;
+        }
+        else if (section == Section::CRITERIA or section == Section::DEDUCTIONS)
+        {
+            const size_t first_separator = line.find(';');
+            const size_t second_separator = first_separator == string::npos
+                    ? string::npos : line.find(';', first_separator + 1);
+            if (second_separator != string::npos)
+            {
+                const string id = normalize_rubric_id(
+                        line.substr(0, first_separator));
+                optional<double> base_score;
+
+                if (section == Section::CRITERIA)
+                {
+                    const auto found = find_if(
+                            rubric.get_criteria().begin(),
+                            rubric.get_criteria().end(),
+                            [&id](const Criterion &criterion)
+                    {
+                        return criterion.get_id() == id;
+                    });
+                    if (found != rubric.get_criteria().end())
+                    {
+                        base_score = found->get_base_score();
+                    }
+                }
+                else
+                {
+                    const auto found = find_if(
+                            rubric.get_deductions().begin(),
+                            rubric.get_deductions().end(),
+                            [&id](const Deduction &deduction)
+                    {
+                        return deduction.get_id() == id;
+                    });
+                    if (found != rubric.get_deductions().end())
+                    {
+                        base_score = found->get_base_deduct_score();
+                    }
+                }
+
+                if (base_score)
+                {
+                    line = line.substr(0, first_separator + 1) +
+                           bracketed_score(*base_score) +
+                           line.substr(second_separator);
+                }
+            }
+        }
+
+        synchronized += line;
+        if (has_newline)
+        {
+            synchronized += '\n';
+            line_begin = newline + 1;
+        }
+        else
+        {
+            line_begin = original.size();
+        }
+    }
+
+    if (synchronized == original)
+    {
+        return;
+    }
+
+    const path temporary = raw_note_path.string() + ".sync.tmp";
+    ofstream output(temporary, ios::binary | ios::trunc);
+    if (!output.is_open())
+    {
+        throw runtime_error("Could not write " + temporary.string());
+    }
+    output << synchronized;
+    output.close();
+    if (!output)
+    {
+        throw runtime_error("Could not finish writing " + temporary.string());
+    }
+
+    error_code error;
+    rename(temporary, raw_note_path, error);
+    if (error)
+    {
+        throw runtime_error("Could not replace " + raw_note_path.string() +
+                            ": " + error.message());
+    }
 }
 
 void CalificationProgram::load_students()

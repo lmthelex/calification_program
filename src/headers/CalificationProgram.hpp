@@ -15,6 +15,8 @@ private:
     size_t report_width;
 
     void load_rubric();
+    void synchronize_raw_notes();
+    void synchronize_raw_note(const path &raw_note_path) const;
     void load_students();
     void ensure_students_loaded();
     vector<Observation> load_general_observations() const;

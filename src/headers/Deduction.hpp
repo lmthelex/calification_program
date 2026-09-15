@@ -23,6 +23,7 @@ public:
 
     //getters and setters
     void set_achieved_deduct_score(double achieved_);
+    void restore_achieved_deduct_score(double achieved_);
     void clear_achieved_deduct_score();
 
     double get_base_deduct_score() const;

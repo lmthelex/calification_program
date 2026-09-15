@@ -14,6 +14,15 @@ void Deduction::set_achieved_deduct_score(double achieved_)
     achieved_deduct_score = achieved_;
 }
 
+void Deduction::restore_achieved_deduct_score(double achieved_)
+{
+    if (!isfinite(achieved_))
+    {
+        throw invalid_argument("Stored deduction score must be finite");
+    }
+    achieved_deduct_score = achieved_;
+}
+
 void Deduction::clear_achieved_deduct_score()
 {
     achieved_deduct_score.reset();

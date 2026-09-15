@@ -75,6 +75,12 @@ criterion has a score. In the grading screen, `<` moves forward, `>` moves
 backward, and `cod` prompts for a direct student-code jump. The list is
 circular; use `q` to return to the main menu.
 
+At every startup, existing `projects/**/raw_note.txt` files are synchronized
+with the loaded rubric. Only the second column containing each base score is
+replaced; achieved scores, descriptions, observations, and line endings are
+preserved. Previously achieved scores are never discarded if a rubric weight
+is lowered.
+
 **Write feedback** creates or replaces `final_note.pdf` for every student whose
 project is `READY`.
 
