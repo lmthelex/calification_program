@@ -1096,9 +1096,13 @@ void CalificationProgram::write_feedback()
     ensure_students_loaded();
     const vector<Observation> general_observations =
             load_general_observations();
+    const path feedback_folder = lab_folder / "feedback";
     size_t written = 0;
 
     print_section_title("WRITING FEEDBACK");
+    cout << bold_pink() << left << setw(10) << "code"
+         << right << setw(10) << "ceiled_note"
+         << setw(14) << "raw_note" << reset_color() << "\n";
     for (auto &student: students)
     {
         if (!student.has_project() or student.get_state() != StudentState::READY)
@@ -1107,8 +1111,15 @@ void CalificationProgram::write_feedback()
         }
         student.get_calification().refresh_observations(general_observations);
         student.save_raw_note();
-        const path output = student.write_feedback(report_width);
-        cout << list_item_color(written) << "  \u2713 " << output.string()
+        student.write_feedback(feedback_folder, report_width);
+
+        const double raw_note = student.get_calification().get_achieved_score();
+        const long long ceiled_note = static_cast<long long>(
+                floor(raw_note + 0.5));
+        cout << list_item_color(written)
+             << left << setw(10) << student.get_code()
+             << right << setw(10) << ceiled_note
+             << setw(14) << fixed << setprecision(2) << raw_note
              << reset_color() << "\n";
         ++written;
     }

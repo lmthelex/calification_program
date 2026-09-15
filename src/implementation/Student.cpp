@@ -411,15 +411,25 @@ void Student::save_raw_note() const
     }
 }
 
-path Student::write_feedback(size_t report_width) const
+path Student::write_feedback(const path &feedback_folder,
+                             size_t report_width) const
 {
     if (!has_project() or get_state() != StudentState::READY)
     {
         throw runtime_error("Feedback can only be written for a READY project");
     }
 
-    const path destination = student_folder / "final_note.pdf";
-    const path temporary = student_folder / "final_note.pdf.tmp";
+    error_code error;
+    create_directories(feedback_folder, error);
+    if (error)
+    {
+        throw runtime_error("Could not create " + feedback_folder.string() +
+                            ": " + error.message());
+    }
+
+    const string filename = student_folder.filename().string() + ".pdf";
+    const path destination = feedback_folder / filename;
+    const path temporary = feedback_folder / (filename + ".tmp");
     ofstream output(temporary, ios::binary | ios::trunc);
     if (!output.is_open())
     {
@@ -434,7 +444,7 @@ path Student::write_feedback(size_t report_width) const
         throw runtime_error("Could not finish writing " + temporary.string());
     }
 
-    error_code error;
+    error.clear();
     rename(temporary, destination, error);
     if (error)
     {

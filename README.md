@@ -114,8 +114,15 @@ replaced; achieved scores, descriptions, observations, and line endings are
 preserved. Previously achieved scores are never discarded if a rubric weight
 is lowered.
 
-**Write feedback** creates or replaces `final_note.pdf` for every student whose
-project is `READY`.
+**Write feedback** creates or replaces one PDF for every `READY` student inside
+the evaluation's central `feedback/` directory. Files use the student's folder
+name, for example `feedback/20242542_LLANA_CORONEL_EVER_DEL_PIERO.pdf`; no new
+feedback PDFs are written inside project folders.
+
+After writing feedback, the program displays `code`, `ceiled_note`, and
+`raw_note` columns for every generated report. The ceiled note uses half-up
+rounding to an integer, so `12.50` becomes `13` while `12.49` becomes `12`;
+the raw note retains two decimal places.
 
 The email menu entry is reserved for the future email transport; no email is
 sent by this version.
