@@ -1,7 +1,109 @@
 #include "../headers/CalificationProgram.hpp"
 
+#include <cstdio>
+#if defined(_WIN32)
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 namespace
 {
+bool use_terminal_colors()
+{
+    if (getenv("NO_COLOR") != nullptr)
+    {
+        return false;
+    }
+    const char *force_color = getenv("CLICOLOR_FORCE");
+    if (force_color != nullptr and string(force_color) != "0")
+    {
+        return true;
+    }
+#if defined(_WIN32)
+    return _isatty(_fileno(stdout)) != 0;
+#else
+    return isatty(fileno(stdout)) != 0;
+#endif
+}
+
+const char *pink()
+{
+    return use_terminal_colors() ? "\033[38;5;205m" : "";
+}
+
+const char *soft_pink()
+{
+    return use_terminal_colors() ? "\033[38;5;218m" : "";
+}
+
+const char *bold_pink()
+{
+    return use_terminal_colors() ? "\033[1;38;5;205m" : "";
+}
+
+const vector<string> &list_line_colors()
+{
+    static const vector<string> colors = {
+            "\033[38;2;218;112;163m",
+            "\033[38;2;225;120;171m",
+            "\033[38;2;232;128;179m",
+            "\033[38;2;239;136;187m",
+            "\033[38;2;246;144;195m",
+            "\033[38;2;239;136;187m",
+            "\033[38;2;232;128;179m",
+            "\033[38;2;225;120;171m"
+    };
+    static const vector<string> no_colors;
+    return use_terminal_colors() ? colors : no_colors;
+}
+
+const char *list_item_color(size_t index)
+{
+    const vector<string> &colors = list_line_colors();
+    return colors.empty() ? "" : colors[index % colors.size()].c_str();
+}
+
+const char *achieved_score_color()
+{
+    return use_terminal_colors() ? "\033[1;38;5;84m" : "";
+}
+
+const char *base_score_color()
+{
+    return use_terminal_colors() ? "\033[38;5;147m" : "";
+}
+
+const char *student_state_color(StudentState state)
+{
+    if (!use_terminal_colors())
+    {
+        return "";
+    }
+    switch (state)
+    {
+        case StudentState::READY:
+            return "\033[1;38;5;84m";
+        case StudentState::INCOMPLETE:
+            return "\033[1;38;5;220m";
+        case StudentState::BLANK:
+            return "\033[1;38;5;117m";
+    }
+    return "";
+}
+
+const char *reset_color()
+{
+    return use_terminal_colors() ? "\033[0m" : "";
+}
+
+void print_section_title(const string &title)
+{
+    cout << bold_pink() << "\n  \u2726 " << title << " \u2726\n"
+         << soft_pink() << "  " << string(title.size() + 4, '-') << "\n"
+         << reset_color();
+}
+
 string trim(const string &value)
 {
     const auto first = find_if_not(value.begin(), value.end(), [](unsigned char c)
@@ -86,6 +188,51 @@ string bracketed_score(double score)
     ostringstream output;
     output << "[" << fixed << setprecision(2) << score << "]";
     return output.str();
+}
+
+string command_name(const string &option)
+{
+    istringstream input(option);
+    string command;
+    input >> command;
+    return command;
+}
+
+size_t criteria_display_width(const string &option, size_t default_width)
+{
+    istringstream input(option);
+    string command;
+    string width_text;
+    string extra;
+    input >> command;
+    if (command != "sc")
+    {
+        throw invalid_argument("Usage: sc [width]");
+    }
+    if (!(input >> width_text))
+    {
+        return default_width;
+    }
+    if (input >> extra)
+    {
+        throw invalid_argument("Usage: sc [width]");
+    }
+
+    size_t read = 0;
+    unsigned long width = 0;
+    try
+    {
+        width = stoul(width_text, &read);
+    }
+    catch (const exception &)
+    {
+        throw invalid_argument("Criteria width must be an integer from 30 to 300");
+    }
+    if (read != width_text.size() or width < 30 or width > 300)
+    {
+        throw invalid_argument("Criteria width must be an integer from 30 to 300");
+    }
+    return static_cast<size_t>(width);
 }
 }
 
@@ -422,52 +569,63 @@ Observation CalificationProgram::create_general_observation(
 
 void CalificationProgram::print_welcome() const
 {
-    cout << "Welcome to Calification program.\n";
-    cout << "Evaluating \"" << evaluation_name << "\".\n";
-    cout << "___\n";
-    cout << "Rubric: Loaded\n";
-    rubric.print(cout, report_width);
-    cout << "___\n";
+    cout << bold_pink()
+         << "\n  \u2665 CALIFICATION PROGRAM \u2665\n"
+         << soft_pink() << "  -------------------------\n"
+         << reset_color();
+    cout << pink() << "  Evaluation  " << reset_color()
+         << evaluation_name << "\n";
+    cout << pink() << "  Rubric      " << reset_color() << "Loaded\n\n";
+    cout << soft_pink();
+    rubric.print(cout, report_width, list_line_colors(), soft_pink());
+    cout << reset_color();
 }
 
 void CalificationProgram::print_menu() const
 {
-    cout << "Menu:\n";
-    cout << "a. Show students\n";
-    cout << "b. Calificate students\n";
-    cout << "c. Write feedback\n";
-    cout << "d. Send emails\n";
-    cout << "Option: " << flush;
+    print_section_title("MAIN MENU");
+    cout << list_item_color(0) << "  [a]  Show students" << reset_color()
+         << "\n";
+    cout << list_item_color(1) << "  [b]  Grade students" << reset_color()
+         << "\n";
+    cout << list_item_color(2) << "  [c]  Write feedback" << reset_color()
+         << "\n";
+    cout << list_item_color(3) << "  [d]  Send emails" << reset_color()
+         << "\n";
+    cout << list_item_color(4) << "  [q]  Quit" << reset_color() << "\n";
+    cout << bold_pink() << "\n  Choose an option \u203a " << reset_color()
+         << flush;
 }
 
 void CalificationProgram::show_students()
 {
     load_students();
 
-    cout << "___\n";
-    cout << "List of students:\n";
-    cout << left << setw(12) << "Code"
+    print_section_title("STUDENTS");
+    cout << bold_pink() << left << setw(12) << "Code"
          << setw(24) << "Last_name"
          << setw(24) << "First_name"
          << setw(10) << "Project"
-         << "State\n";
+         << "State\n" << reset_color();
 
     size_t without_project = 0;
-    for (const auto &student: students)
+    for (size_t index = 0; index < students.size(); ++index)
     {
+        const Student &student = students[index];
         if (!student.has_project())
         {
             ++without_project;
         }
-        cout << left << setw(12) << student.get_code()
+        cout << list_item_color(index)
+             << left << setw(12) << student.get_code()
              << setw(24) << student.get_last_name()
              << setw(24) << student.get_first_name()
-             << setw(10) << (student.has_project() ? "true" : "false")
-             << student.get_state_name() << "\n";
+             << setw(10) << (student.has_project() ? "true" : "false");
+        cout << student_state_color(student.get_state())
+             << student.get_state_name() << reset_color() << "\n";
     }
-    cout << "\nTotal: " << students.size() << " (" << without_project
-         << " without project)\n";
-    cout << "___\n";
+    cout << pink() << "\n  Total  " << reset_color() << students.size()
+         << " students (" << without_project << " without project)\n";
 }
 
 void CalificationProgram::calificate_criterion(Student &student,
@@ -480,13 +638,15 @@ void CalificationProgram::calificate_criterion(Student &student,
              << " does not exist.\n";
         return;
     }
-    cout << "Criterion choosen: " << criterion->get_id() << "\n";
-    cout << "\t" << criterion->get_description() << "\n";
+    cout << pink() << "  Criterion  " << reset_color()
+         << criterion->get_id() << "\n";
+    cout << "  " << criterion->get_description() << "\n";
 
     while (cin)
     {
-        cout << "Achieved [" << fixed << setprecision(2)
-             << criterion->get_base_score() << "]: " << flush;
+        cout << bold_pink() << "  Achieved [" << fixed << setprecision(2)
+             << criterion->get_base_score() << "] \u203a " << reset_color()
+             << flush;
         string input;
         if (!getline(cin, input))
         {
@@ -507,7 +667,7 @@ void CalificationProgram::calificate_criterion(Student &student,
 
 void CalificationProgram::calificate_deduction(Student &student)
 {
-    cout << "Deduction choosen: " << flush;
+    cout << bold_pink() << "  Deduction ID \u203a " << reset_color() << flush;
     string id;
     if (!getline(cin, id))
     {
@@ -520,12 +680,13 @@ void CalificationProgram::calificate_deduction(Student &student)
         cout << "Error: Deduction does not exist.\n";
         return;
     }
-    cout << "\t" << deduction->get_description() << "\n";
+    cout << "  " << deduction->get_description() << "\n";
 
     while (cin)
     {
-        cout << "Achieved [" << fixed << setprecision(2)
-             << deduction->get_base_deduct_score() << "]: " << flush;
+        cout << bold_pink() << "  Applied [" << fixed << setprecision(2)
+             << deduction->get_base_deduct_score() << "] \u203a "
+             << reset_color() << flush;
         string input;
         if (!getline(cin, input))
         {
@@ -551,14 +712,16 @@ void CalificationProgram::register_observation(Student &student)
     student_rubric.refresh_observations(general_observations);
     student.save_raw_note();
 
-    cout << "___\n";
-    cout << "Observations already registered:\n";
-    for (const auto &observation: general_observations)
+    print_section_title("OBSERVATION LIBRARY");
+    for (size_t index = 0; index < general_observations.size(); ++index)
     {
-        cout << " " << observation.get_id() << ". "
-             << observation.get_description() << "\n";
+        const Observation &observation = general_observations[index];
+        cout << list_item_color(index) << "  " << observation.get_id()
+             << ". " << observation.get_description() << reset_color()
+             << "\n";
     }
-    cout << "Observation type (On, string, n): " << flush;
+    cout << bold_pink() << "\n  Observation (On, text, or n for new) \u203a "
+         << reset_color() << flush;
 
     string input;
     if (!getline(cin, input))
@@ -568,7 +731,8 @@ void CalificationProgram::register_observation(Student &student)
     const string option = trim(input);
     if (option == "n")
     {
-        cout << "You are registering a new general observation: " << flush;
+        cout << bold_pink() << "  New reusable observation \u203a "
+             << reset_color() << flush;
         string description;
         if (!getline(cin, description))
         {
@@ -610,6 +774,77 @@ void CalificationProgram::register_observation(Student &student)
     student.save_raw_note();
 }
 
+void CalificationProgram::delete_observation(Student &student)
+{
+    Rubric &student_rubric = student.get_calification();
+    const vector<Observation> &observations = student_rubric.get_observations();
+
+    print_section_title("DELETE OBSERVATION");
+    if (observations.empty())
+    {
+        cout << "  This student has no registered observations.\n";
+        return;
+    }
+
+    for (size_t index = 0; index < observations.size(); ++index)
+    {
+        const Observation &observation = observations[index];
+        cout << list_item_color(index) << "  [" << index + 1 << "] ";
+        if (!observation.get_id().empty())
+        {
+            cout << observation.get_id() << ". ";
+        }
+        cout << observation.get_description() << reset_color() << "\n";
+    }
+
+    while (cin)
+    {
+        cout << bold_pink()
+             << "\n  Observation number (q to cancel) \u203a "
+             << reset_color() << flush;
+        string input;
+        if (!getline(cin, input))
+        {
+            return;
+        }
+        input = trim(input);
+        if (input == "q" or input == "cancel")
+        {
+            cout << "  Deletion cancelled.\n";
+            return;
+        }
+
+        size_t read = 0;
+        unsigned long selection = 0;
+        try
+        {
+            selection = stoul(input, &read);
+        }
+        catch (const exception &)
+        {
+            read = 0;
+        }
+        if (input.empty() or read != input.size() or selection == 0 or
+            selection > observations.size())
+        {
+            cout << "  Enter a number from 1 to " << observations.size()
+                 << ", or q to cancel.\n";
+            continue;
+        }
+
+        const size_t index = static_cast<size_t>(selection - 1);
+        const string removed_description = observations[index].get_description();
+        if (!student_rubric.remove_observation(index))
+        {
+            throw runtime_error("Could not remove the selected observation");
+        }
+        student.save_raw_note();
+        cout << achieved_score_color() << "  \u2713 Removed  " << reset_color()
+             << removed_description << "\n";
+        return;
+    }
+}
+
 void CalificationProgram::calificate_students()
 {
     ensure_students_loaded();
@@ -626,7 +861,6 @@ void CalificationProgram::calificate_students()
     if (pending_students.empty())
     {
         cout << "No students with a pending project calification.\n";
-        cout << "___\n";
         return;
     }
 
@@ -635,21 +869,28 @@ void CalificationProgram::calificate_students()
     {
         Student &student = students[pending_students[current]];
 
-        cout << "___\n";
-        cout << "Student: " << student.get_last_name() << " "
+        print_section_title("CURRENT STUDENT");
+        cout << pink() << "  Name  " << reset_color()
+             << student.get_last_name() << " "
              << student.get_first_name() << "\n";
-        cout << "Code: " << student.get_code() << "\n";
-        cout << "Path: " << student.get_project_folder()->string() << "\n";
+        cout << pink() << "  Code  " << reset_color()
+             << student.get_code() << "\n";
+        cout << pink() << "  Path  " << reset_color()
+             << student.get_project_folder()->string() << "\n";
+        cout << soft_pink()
+             << "\n  Commands  criterion #  d  o  do  sc [width]  sd  so  <  >  cod  help  q\n"
+             << reset_color();
 
         while (cin)
         {
-            cout << "Option (criterion id,d,o,show)(<,>,cod)(help): " << flush;
+            cout << bold_pink() << "\n  grade \u203a " << reset_color() << flush;
             string option;
             if (!getline(cin, option))
             {
                 return;
             }
             option = trim(option);
+            const string command = command_name(option);
             if (option == "d")
             {
                 calificate_deduction(student);
@@ -658,11 +899,48 @@ void CalificationProgram::calificate_students()
             {
                 register_observation(student);
             }
+            else if (option == "do")
+            {
+                delete_observation(student);
+            }
+            else if (command == "sc")
+            {
+                try
+                {
+                    const size_t display_width = criteria_display_width(
+                            option, report_width);
+                    cout << pink();
+                    student.get_calification().print_current_criteria(
+                            cout, display_width, achieved_score_color(),
+                            base_score_color(), pink(), list_line_colors());
+                    cout << reset_color();
+                }
+                catch (const invalid_argument &error)
+                {
+                    cout << "Error: " << error.what() << ".\n";
+                }
+            }
+            else if (option == "sd")
+            {
+                cout << pink();
+                student.get_calification().print_current_deductions(
+                        cout, report_width, list_line_colors(), pink());
+                cout << reset_color();
+            }
+            else if (option == "so")
+            {
+                cout << pink();
+                student.get_calification().print_current_observations(
+                        cout, report_width, list_line_colors(), pink());
+                cout << reset_color();
+            }
+            else if (command == "sd" or command == "so")
+            {
+                cout << "Error: Usage: " << command << ".\n";
+            }
             else if (option == "show")
             {
-                cout << "___\n";
-                student.get_calification().print_current_scores(cout);
-                cout << "___\n";
+                cout << "The show command is now split into sc, sd, and so.\n";
             }
             else if (option == "<")
             {
@@ -677,7 +955,8 @@ void CalificationProgram::calificate_students()
             }
             else if (option == "cod")
             {
-                cout << "Student code: " << flush;
+                cout << bold_pink() << "  Student code \u203a "
+                     << reset_color() << flush;
                 string code;
                 if (!getline(cin, code))
                 {
@@ -704,19 +983,38 @@ void CalificationProgram::calificate_students()
             }
             else if (option == "q")
             {
-                cout << "___\n";
                 return;
             }
             else if (option == "help")
             {
-                cout << "number - Criteria calification (1 selects 01)\n";
-                cout << "d - Discount applied\n";
-                cout << "o - Observation registration\n";
-                cout << "show - Show current base and achieved scores\n";
-                cout << "< - Next student (forward)\n";
-                cout << "> - Previous student (backward)\n";
-                cout << "cod - Go directly to a student code\n";
-                cout << "q - Return to the main menu\n";
+                print_section_title("GRADING COMMANDS");
+                cout << list_item_color(0)
+                     << "  number      Grade a criterion (1 selects 01)"
+                     << reset_color() << "\n";
+                cout << list_item_color(1) << "  d           Apply a deduction"
+                     << reset_color() << "\n";
+                cout << list_item_color(2)
+                     << "  o           Register an observation"
+                     << reset_color() << "\n";
+                cout << list_item_color(3)
+                     << "  do          Delete a registered observation"
+                     << reset_color() << "\n";
+                cout << list_item_color(4)
+                     << "  sc [width]  Show criteria (default width: "
+                     << report_width << ")" << reset_color() << "\n";
+                cout << list_item_color(5) << "  sd          Show deductions"
+                     << reset_color() << "\n";
+                cout << list_item_color(6) << "  so          Show observations"
+                     << reset_color() << "\n";
+                cout << list_item_color(7)
+                     << "  < / >       Next / previous student"
+                     << reset_color() << "\n";
+                cout << list_item_color(8)
+                     << "  cod         Go to a student code"
+                     << reset_color() << "\n";
+                cout << list_item_color(9)
+                     << "  q           Return to the main menu"
+                     << reset_color() << "\n";
             }
             else
             {
@@ -742,7 +1040,7 @@ void CalificationProgram::write_feedback()
             load_general_observations();
     size_t written = 0;
 
-    cout << "___\n";
+    print_section_title("WRITING FEEDBACK");
     for (auto &student: students)
     {
         if (!student.has_project() or student.get_state() != StudentState::READY)
@@ -752,11 +1050,12 @@ void CalificationProgram::write_feedback()
         student.get_calification().refresh_observations(general_observations);
         student.save_raw_note();
         const path output = student.write_feedback(report_width);
-        cout << "Feedback written: " << output.string() << "\n";
+        cout << list_item_color(written) << "  \u2713 " << output.string()
+             << reset_color() << "\n";
         ++written;
     }
-    cout << "Total feedback files: " << written << "\n";
-    cout << "___\n";
+    cout << pink() << "\n  Total  " << reset_color()
+         << written << " feedback files\n";
 }
 
 void CalificationProgram::run()
@@ -788,7 +1087,8 @@ void CalificationProgram::run()
             }
             else if (option == "d")
             {
-                cout << "Send emails is not implemented yet.\n___\n";
+                cout << pink() << "  Send emails  " << reset_color()
+                     << "Not implemented yet.\n";
             }
             else if (option == "q")
             {
@@ -796,12 +1096,13 @@ void CalificationProgram::run()
             }
             else
             {
-                cout << "Error: Unknown menu option.\n___\n";
+                cout << pink() << "  Unknown option.  " << reset_color()
+                     << "Choose a, b, c, d, or q.\n";
             }
         }
         catch (const exception &error)
         {
-            cerr << "Error: " << error.what() << "\n___\n";
+            cerr << "Error: " << error.what() << "\n";
         }
     }
 }

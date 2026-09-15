@@ -194,6 +194,58 @@ size_t displayed_width(const string &text)
     return width;
 }
 
+string truncate_to_width(const string &text, size_t width)
+{
+    if (displayed_width(text) <= width)
+    {
+        return text;
+    }
+
+    constexpr size_t ELLIPSIS_WIDTH = 3;
+    if (width <= ELLIPSIS_WIDTH)
+    {
+        return string(width, '.');
+    }
+
+    const size_t content_width = width - ELLIPSIS_WIDTH;
+    string result;
+    size_t current_width = 0;
+    size_t index = 0;
+    while (index < text.size() and current_width < content_width)
+    {
+        const unsigned char character = text[index];
+        size_t character_bytes = 1;
+        if ((character & 0xE0) == 0xC0)
+        {
+            character_bytes = 2;
+        }
+        else if ((character & 0xF0) == 0xE0)
+        {
+            character_bytes = 3;
+        }
+        else if ((character & 0xF8) == 0xF0)
+        {
+            character_bytes = 4;
+        }
+        character_bytes = min(character_bytes, text.size() - index);
+        result.append(text, index, character_bytes);
+        index += character_bytes;
+        ++current_width;
+    }
+    return result + "...";
+}
+
+string current_value(bool has_value, double value)
+{
+    return has_value ? format_score(value) : "-";
+}
+
+const string &line_color(const vector<string> &colors, size_t index,
+                         const string &default_color)
+{
+    return colors.empty() ? default_color : colors[index % colors.size()];
+}
+
 void print_wrapped(ostream &output, const string &prefix,
                    const string &description, size_t report_width)
 {
@@ -608,58 +660,131 @@ void Rubric::write_raw_note(ostream &raw_note_file) const
     }
 }
 
-void Rubric::print(ostream &output, size_t report_width) const
+void Rubric::print(ostream &output, size_t report_width,
+                   const vector<string> &line_colors,
+                   const string &default_color) const
 {
-    for (const auto &criterion: criteria)
+    for (size_t index = 0; index < criteria.size(); ++index)
     {
+        const Criterion &criterion = criteria[index];
+        output << line_color(line_colors, index, default_color);
         print_rubric_item(output, criterion, criterion.get_base_score(),
                           report_width);
+        output << default_color;
     }
     output << "\nTotal: " << fixed << setprecision(2) << get_base_score() << "\n";
 }
 
-void Rubric::print_current_scores(ostream &output) const
+void Rubric::print_current_criteria(
+        ostream &output, size_t display_width,
+        const string &achieved_color, const string &base_color,
+        const string &default_color, const vector<string> &line_colors) const
 {
-    output << "Current scores:\n";
-    output << "Criteria:\n";
-    output << left << setw(10) << "ID" << right << setw(10) << "Base"
-           << setw(14) << "Achieved\n";
-    for (const auto &criterion: criteria)
+    const string separator(display_width, '-');
+    output << separator << "\nCRITERIA\n" << separator << "\n";
+
+    double criteria_total = 0.0;
+    for (size_t index = 0; index < criteria.size(); ++index)
     {
-        output << left << setw(10) << criterion.get_id()
-               << right << setw(10) << fixed << setprecision(2)
-               << criterion.get_base_score() << setw(14);
+        const Criterion &criterion = criteria[index];
+        const string &criterion_color = line_color(
+                line_colors, index, default_color);
+        const string leading = "  " + display_id(criterion.get_id()) + " ";
+        const string achieved = current_value(
+                criterion.has_achieved_score(), criterion.get_achieved_score());
+        const string between_scores = " [";
+        const string base = format_score(criterion.get_base_score());
+        const string description_prefix = "] ";
+        const string line = truncate_to_width(
+                leading + achieved + between_scores + base +
+                description_prefix + criterion.get_description(),
+                display_width);
+
+        const size_t achieved_begin = leading.size();
+        const size_t base_begin = achieved_begin + achieved.size() +
+                                  between_scores.size();
+        const size_t description_begin = base_begin + base.size() +
+                                         description_prefix.size();
+        if (line.size() >= description_begin)
+        {
+            output << criterion_color << leading
+                   << achieved_color << achieved << criterion_color
+                   << between_scores << base_color << base << criterion_color
+                   << line.substr(base_begin + base.size())
+                   << default_color << "\n";
+        }
+        else
+        {
+            output << criterion_color << line << default_color << "\n";
+        }
         if (criterion.has_achieved_score())
         {
-            output << criterion.get_achieved_score();
+            criteria_total += criterion.get_achieved_score();
         }
-        else
-        {
-            output << "-";
-        }
-        output << "\n";
     }
+    output << separator << "\nCriteria score: " << fixed << setprecision(2)
+           << criteria_total << " / " << get_base_score() << "\n";
+}
 
-    output << "\nDeductions:\n";
-    output << left << setw(10) << "ID" << right << setw(10) << "Base"
-           << setw(14) << "Achieved\n";
-    for (const auto &deduction: deductions)
+void Rubric::print_current_deductions(
+        ostream &output, size_t report_width,
+        const vector<string> &line_colors, const string &default_color) const
+{
+    const string separator(report_width, '-');
+    output << separator << "\nDEDUCTIONS\n" << separator << "\n";
+    double deduction_total = 0.0;
+    for (size_t index = 0; index < deductions.size(); ++index)
     {
-        output << left << setw(10) << deduction.get_id()
-               << right << setw(10) << fixed << setprecision(2)
-               << deduction.get_base_deduct_score() << setw(14);
+        const Deduction &deduction = deductions[index];
+        output << line_color(line_colors, index, default_color);
+        print_rubric_item(output, deduction,
+                          deduction.get_base_deduct_score(), report_width);
+        output << "\t   Applied: ";
         if (deduction.has_achieved_deduct_score())
         {
-            output << deduction.get_achieved_deduct_score();
+            output << fixed << setprecision(2)
+                   << deduction.get_achieved_deduct_score();
+            deduction_total += deduction.get_achieved_deduct_score();
         }
         else
         {
             output << "-";
         }
-        output << "\n";
+        output << default_color << "\n\n";
     }
-    output << "\nCurrent total: " << fixed << setprecision(2)
-           << get_achieved_score() << "\n";
+    if (deductions.empty())
+    {
+        output << "\t No deductions available.\n";
+    }
+    output << separator << "\nApplied deductions: " << fixed
+           << setprecision(2) << deduction_total << "\n";
+}
+
+void Rubric::print_current_observations(
+        ostream &output, size_t report_width,
+        const vector<string> &line_colors, const string &default_color) const
+{
+    const string separator(report_width, '-');
+    output << separator << "\nOBSERVATIONS\n" << separator << "\n";
+    if (observations.empty())
+    {
+        output << "\t No observations registered.\n";
+    }
+    else
+    {
+        for (size_t index = 0; index < observations.size(); ++index)
+        {
+            const Observation &observation = observations[index];
+            const string prefix = observation.get_id().empty()
+                    ? "\t - "
+                    : "\t " + display_id(observation.get_id()) + " ";
+            output << line_color(line_colors, index, default_color);
+            print_wrapped(output, prefix, observation.get_description(),
+                          report_width);
+            output << default_color;
+        }
+    }
+    output << separator << "\n";
 }
 
 void Rubric::print_feedback(ostream &output, size_t report_width) const
@@ -727,6 +852,16 @@ void Rubric::add_observation(const Observation &observation)
     {
         observations.push_back(observation);
     }
+}
+
+bool Rubric::remove_observation(size_t index)
+{
+    if (index >= observations.size())
+    {
+        return false;
+    }
+    observations.erase(observations.begin() + static_cast<ptrdiff_t>(index));
+    return true;
 }
 
 void Rubric::refresh_observations(

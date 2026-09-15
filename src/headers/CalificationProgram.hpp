@@ -29,6 +29,7 @@ private:
     void calificate_criterion(Student &student, int criterion_id);
     void calificate_deduction(Student &student);
     void register_observation(Student &student);
+    void delete_observation(Student &student);
     void write_feedback();
 
 public:

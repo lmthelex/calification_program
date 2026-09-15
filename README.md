@@ -78,8 +78,25 @@ criterion has a score. In the grading screen, `<` moves forward, `>` moves
 backward, and `cod` prompts for a direct student-code jump. The list is
 circular; use `q` to return to the main menu. Enter a criterion number directly
 to grade it—there is no preceding `c` command. For example, entering `1` shows
-and grades criterion `01`. Enter `show` to display every current base and
-achieved score; criteria or deductions that have not been graded display `-`.
+and grades criterion `01`. Use `sc` to show criteria, `sd` to show deductions,
+and `so` to show observations. The criteria view prints exactly one criterion
+per line and truncates long lines with `...` instead of wrapping them. Its width
+uses the configured report width (85 by default); pass a temporary override in
+the command, such as `sc 90`. Each row uses the compact format
+`ID. achieved [base] description`; criteria that have not been graded display
+`-` as the achieved value.
+
+Interactive menus use a pink terminal theme. Color is automatically omitted
+when output is redirected and can be explicitly disabled by setting `NO_COLOR`.
+Achieved and base scores use separate accent colors, as do the `READY`,
+`INCOMPLETE`, and `BLANK` student states. Lists cycle through subtle variations
+of the same pink hue so adjacent rows are easy to distinguish without adding
+visual noise.
+
+Use `do` while grading to delete an observation from the current student. The
+command presents the student's observations as a numbered list, accepts `q` to
+cancel, and saves the updated `raw_note.txt` immediately. Reusable entries in
+`meta/observations.txt` are not deleted.
 
 At every startup, existing `projects/**/raw_note.txt` files are synchronized
 with the loaded rubric. Only the second column containing each base score is

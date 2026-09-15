@@ -43,12 +43,28 @@ public:
     void read_rubric(istream &rubric_file);
     void read_raw_note(istream &raw_note_file);
     void write_raw_note(ostream &raw_note_file) const;
-    void print(ostream &output, size_t report_width) const;
-    void print_current_scores(ostream &output) const;
+    void print(ostream &output, size_t report_width,
+               const vector<string> &line_colors = {},
+               const string &default_color = "") const;
+    void print_current_criteria(
+            ostream &output, size_t display_width,
+            const string &achieved_color = "",
+            const string &base_color = "",
+            const string &default_color = "",
+            const vector<string> &line_colors = {}) const;
+    void print_current_deductions(
+            ostream &output, size_t report_width,
+            const vector<string> &line_colors = {},
+            const string &default_color = "") const;
+    void print_current_observations(
+            ostream &output, size_t report_width,
+            const vector<string> &line_colors = {},
+            const string &default_color = "") const;
     void print_feedback(ostream &output, size_t report_width) const;
 
     //observations selected for one student
     void add_observation(const Observation &observation);
+    bool remove_observation(size_t index);
     void refresh_observations(const vector<Observation> &general_observations);
 };
 
