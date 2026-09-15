@@ -23,3 +23,11 @@ add_executable(calification_program src/main.cpp
         src/implementation/Item.cpp
         src/headers/Item.hpp
         src/headers/utils.hpp)
+
+
+add_custom_target(delete_raw_notes_prog2_lab1
+    COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/DeleteRawNotes.sh --eval prog2/lab1
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Delete raw notes for prog2/lab1..."
+    VERBATIM
+)

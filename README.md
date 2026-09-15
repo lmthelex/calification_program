@@ -86,3 +86,14 @@ project is `READY`.
 
 The email menu entry is reserved for the future email transport; no email is
 sent by this version.
+
+## Delete raw notes
+
+To remove every `raw_note.txt` for one evaluation, run:
+
+```sh
+./scripts/DeleteRawNotes.sh --eval prog2/lab1
+```
+
+The script reports how many files it found and requires two confirmations
+before deleting anything: `y`/`yes`, followed by the exact word `DELETE`.
