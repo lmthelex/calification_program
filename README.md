@@ -75,16 +75,22 @@ Scores, deductions, and observations are written atomically to `raw_note.txt`
 after every grading action. A student is `BLANK` until an action is recorded,
 `INCOMPLETE` while some criteria remain ungraded, and `READY` when every
 criterion has a score. In the grading screen, `<` moves forward, `>` moves
-backward, and `cod` prompts for a direct student-code jump. The list is
-circular; use `q` to return to the main menu. Enter a criterion number directly
-to grade it—there is no preceding `c` command. For example, entering `1` shows
-and grades criterion `01`. Use `sc` to show criteria, `sd` to show deductions,
-and `so` to show observations. The criteria view prints exactly one criterion
+backward, and `cod` prompts for a direct student-code jump. Every student with a
+project remains in the grading list, including `READY` students, so existing
+grades can be revised. The screen initially selects the first `BLANK` student,
+then the first `INCOMPLETE` student if none are blank, or the first student when
+everyone is `READY`. Direct code navigation can also select `READY` students.
+The list is circular; use `q` to return to the main menu. Enter a criterion
+number directly to grade it—there is no preceding `c` command. For example,
+entering `1` shows and grades criterion `01`. Use `sc` to show criteria, `sd` to
+show deductions, and `so` to show observations. The criteria view prints
+exactly one criterion
 per line and truncates long lines with `...` instead of wrapping them. Its width
 uses the configured report width (85 by default); pass a temporary override in
 the command, such as `sc 90`. Each row uses the compact format
 `ID. achieved [base] description`; criteria that have not been graded display
-`-` as the achieved value.
+`-` as the achieved value. The criteria view also identifies the current
+student by name, code, and project path.
 
 Interactive menus use a pink terminal theme. Color is automatically omitted
 when output is redirected and can be explicitly disabled by setting `NO_COLOR`.
@@ -97,6 +103,10 @@ Use `do` while grading to delete an observation from the current student. The
 command presents the student's observations as a numbered list, accepts `q` to
 cancel, and saves the updated `raw_note.txt` immediately. Reusable entries in
 `meta/observations.txt` are not deleted.
+
+Selecting `d` displays the complete deduction catalog—with IDs, base values,
+descriptions, and alternating pink row shades—before prompting for a deduction
+ID.
 
 At every startup, existing `projects/**/raw_note.txt` files are synchronized
 with the loaded rubric. Only the second column containing each base score is

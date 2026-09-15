@@ -104,6 +104,29 @@ void print_section_title(const string &title)
          << reset_color();
 }
 
+void print_student_card(const Student &student, const string &title)
+{
+    print_section_title(title);
+    cout << pink() << "  Name  " << reset_color()
+         << student.get_last_name() << " " << student.get_first_name()
+         << "\n";
+    cout << pink() << "  Code  " << reset_color()
+         << student.get_code() << "\n";
+    cout << pink() << "  State " << reset_color()
+         << student_state_color(student.get_state())
+         << student.get_state_name() << reset_color() << "\n";
+    cout << pink() << "  Path  " << reset_color();
+    if (student.get_project_folder())
+    {
+        cout << student.get_project_folder()->string();
+    }
+    else
+    {
+        cout << "-";
+    }
+    cout << "\n";
+}
+
 string trim(const string &value)
 {
     const auto first = find_if_not(value.begin(), value.end(), [](unsigned char c)
@@ -667,7 +690,27 @@ void CalificationProgram::calificate_criterion(Student &student,
 
 void CalificationProgram::calificate_deduction(Student &student)
 {
-    cout << bold_pink() << "  Deduction ID \u203a " << reset_color() << flush;
+    const vector<Deduction> &deductions =
+            student.get_calification().get_deductions();
+    print_section_title("DEDUCTIONS");
+    if (deductions.empty())
+    {
+        cout << "  No deductions are available.\n";
+        return;
+    }
+
+    for (size_t index = 0; index < deductions.size(); ++index)
+    {
+        const Deduction &deduction = deductions[index];
+        const char *row_color = list_item_color(index);
+        cout << row_color << "  " << deduction.get_id() << ". ["
+             << base_score_color() << fixed << setprecision(2)
+             << deduction.get_base_deduct_score() << row_color << "] "
+             << deduction.get_description() << reset_color() << "\n";
+    }
+
+    cout << bold_pink() << "\n  Deduction ID \u203a " << reset_color()
+         << flush;
     string id;
     if (!getline(cin, id))
     {
@@ -680,8 +723,6 @@ void CalificationProgram::calificate_deduction(Student &student)
         cout << "Error: Deduction does not exist.\n";
         return;
     }
-    cout << "  " << deduction->get_description() << "\n";
-
     while (cin)
     {
         cout << bold_pink() << "  Applied [" << fixed << setprecision(2)
@@ -848,35 +889,51 @@ void CalificationProgram::delete_observation(Student &student)
 void CalificationProgram::calificate_students()
 {
     ensure_students_loaded();
-    vector<size_t> pending_students;
+    vector<size_t> grading_students;
     for (size_t index = 0; index < students.size(); ++index)
     {
-        if (students[index].has_project() and
-            students[index].get_state() != StudentState::READY)
+        if (students[index].has_project())
         {
-            pending_students.push_back(index);
+            grading_students.push_back(index);
         }
     }
 
-    if (pending_students.empty())
+    if (grading_students.empty())
     {
-        cout << "No students with a pending project calification.\n";
+        cout << "No students with a project to grade.\n";
         return;
     }
 
+    const auto first_blank = find_if(
+            grading_students.begin(), grading_students.end(),
+            [this](size_t index)
+    {
+        return students[index].get_state() == StudentState::BLANK;
+    });
+    const auto first_incomplete = find_if(
+            grading_students.begin(), grading_students.end(),
+            [this](size_t index)
+    {
+        return students[index].get_state() == StudentState::INCOMPLETE;
+    });
+
     size_t current = 0;
+    if (first_blank != grading_students.end())
+    {
+        current = static_cast<size_t>(
+                distance(grading_students.begin(), first_blank));
+    }
+    else if (first_incomplete != grading_students.end())
+    {
+        current = static_cast<size_t>(
+                distance(grading_students.begin(), first_incomplete));
+    }
+
     while (cin)
     {
-        Student &student = students[pending_students[current]];
+        Student &student = students[grading_students[current]];
 
-        print_section_title("CURRENT STUDENT");
-        cout << pink() << "  Name  " << reset_color()
-             << student.get_last_name() << " "
-             << student.get_first_name() << "\n";
-        cout << pink() << "  Code  " << reset_color()
-             << student.get_code() << "\n";
-        cout << pink() << "  Path  " << reset_color()
-             << student.get_project_folder()->string() << "\n";
+        print_student_card(student, "CURRENT STUDENT");
         cout << soft_pink()
              << "\n  Commands  criterion #  d  o  do  sc [width]  sd  so  <  >  cod  help  q\n"
              << reset_color();
@@ -909,7 +966,8 @@ void CalificationProgram::calificate_students()
                 {
                     const size_t display_width = criteria_display_width(
                             option, report_width);
-                    cout << pink();
+                    print_student_card(student, "CRITERIA FOR STUDENT");
+                    cout << "\n" << pink();
                     student.get_calification().print_current_criteria(
                             cout, display_width, achieved_score_color(),
                             base_score_color(), pink(), list_line_colors());
@@ -944,13 +1002,13 @@ void CalificationProgram::calificate_students()
             }
             else if (option == "<")
             {
-                current = (current + 1) % pending_students.size();
+                current = (current + 1) % grading_students.size();
                 break;
             }
             else if (option == ">")
             {
-                current = (current + pending_students.size() - 1) %
-                          pending_students.size();
+                current = (current + grading_students.size() - 1) %
+                          grading_students.size();
                 break;
             }
             else if (option == "cod")
@@ -964,20 +1022,20 @@ void CalificationProgram::calificate_students()
                 }
                 code = trim(code);
                 const auto found = find_if(
-                        pending_students.begin(), pending_students.end(),
+                        grading_students.begin(), grading_students.end(),
                         [&code, this](size_t index)
                 {
                     return students[index].get_code() == code;
                 });
-                if (found == pending_students.end())
+                if (found == grading_students.end())
                 {
-                    cout << "Error: No pending project for student code "
+                    cout << "Error: No project found for student code "
                          << code << ".\n";
                 }
                 else
                 {
                     current = static_cast<size_t>(
-                            distance(pending_students.begin(), found));
+                            distance(grading_students.begin(), found));
                     break;
                 }
             }
