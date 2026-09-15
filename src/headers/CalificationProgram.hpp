@@ -12,6 +12,7 @@ private:
     Rubric rubric;
     vector<Student> students;
     bool students_loaded;
+    size_t report_width;
 
     void load_rubric();
     void load_students();
@@ -29,7 +30,8 @@ private:
     void write_feedback();
 
 public:
-    CalificationProgram(string evaluation_name_, path lab_folder_);
+    CalificationProgram(string evaluation_name_, path lab_folder_,
+                        size_t report_width_);
     void run();
 };
 

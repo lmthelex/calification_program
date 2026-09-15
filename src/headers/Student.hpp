@@ -49,7 +49,7 @@ public:
 
     void prepare(const path &lab_folder);
     void save_raw_note() const;
-    path write_feedback() const;
+    path write_feedback(size_t report_width) const;
 };
 
 #endif //CALIFICATION_PROGRAM_STUDENT_HPP

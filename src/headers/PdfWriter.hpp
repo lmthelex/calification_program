@@ -3,6 +3,6 @@
 
 #include "utils.hpp"
 
-void write_pdf(ostream &output, const string &text);
+void write_pdf(ostream &output, const string &text, size_t report_width);
 
 #endif //CALIFICATION_PROGRAM_PDF_WRITER_HPP

@@ -411,7 +411,7 @@ void Student::save_raw_note() const
     }
 }
 
-path Student::write_feedback() const
+path Student::write_feedback(size_t report_width) const
 {
     if (!has_project() or get_state() != StudentState::READY)
     {
@@ -426,8 +426,8 @@ path Student::write_feedback() const
         throw runtime_error("Could not write " + temporary.string());
     }
     ostringstream feedback;
-    calification.print_feedback(feedback);
-    write_pdf(output, feedback.str());
+    calification.print_feedback(feedback, report_width);
+    write_pdf(output, feedback.str(), report_width);
     output.close();
     if (!output)
     {

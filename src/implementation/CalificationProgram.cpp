@@ -72,10 +72,12 @@ vector<Observation>::const_iterator find_observation(
 }
 }
 
-CalificationProgram::CalificationProgram(string evaluation_name_, path lab_folder_)
+CalificationProgram::CalificationProgram(string evaluation_name_, path lab_folder_,
+                                         size_t report_width_)
     : evaluation_name(std::move(evaluation_name_))
     , lab_folder(std::move(lab_folder_))
     , students_loaded(false)
+    , report_width(report_width_)
 {
     load_rubric();
 }
@@ -242,7 +244,7 @@ void CalificationProgram::print_welcome() const
     cout << "Evaluating \"" << evaluation_name << "\".\n";
     cout << "___\n";
     cout << "Rubric: Loaded\n";
-    rubric.print(cout);
+    rubric.print(cout, report_width);
     cout << "___\n";
 }
 
@@ -574,7 +576,7 @@ void CalificationProgram::write_feedback()
         }
         student.get_calification().refresh_observations(general_observations);
         student.save_raw_note();
-        const path output = student.write_feedback();
+        const path output = student.write_feedback(report_width);
         cout << "Feedback written: " << output.string() << "\n";
         ++written;
     }

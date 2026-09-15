@@ -136,6 +136,89 @@ string display_id(const string &id)
 {
     return id + ".";
 }
+
+string format_score(double score)
+{
+    ostringstream output;
+    output << fixed << setprecision(2) << score;
+    return output.str();
+}
+
+vector<string> wrap_words(const string &text, size_t width)
+{
+    vector<string> lines;
+    istringstream input(text);
+    string word;
+    string current;
+
+    while (input >> word)
+    {
+        if (!current.empty() and current.size() + 1 + word.size() <= width)
+        {
+            current += " " + word;
+            continue;
+        }
+        if (!current.empty())
+        {
+            lines.push_back(current);
+            current.clear();
+        }
+        while (word.size() > width)
+        {
+            lines.push_back(word.substr(0, width));
+            word.erase(0, width);
+        }
+        current = word;
+    }
+    if (!current.empty() or lines.empty())
+    {
+        lines.push_back(current);
+    }
+    return lines;
+}
+
+size_t displayed_width(const string &text)
+{
+    size_t width = 0;
+    for (unsigned char character: text)
+    {
+        if (character == '\t')
+        {
+            width += 8 - width % 8;
+        }
+        else if ((character & 0xC0) != 0x80)
+        {
+            ++width;
+        }
+    }
+    return width;
+}
+
+void print_wrapped(ostream &output, const string &prefix,
+                   const string &description, size_t report_width)
+{
+    const size_t prefix_width = displayed_width(prefix);
+    if (prefix_width >= report_width)
+    {
+        throw runtime_error("Report width is too small for rubric item prefix");
+    }
+    const string continuation(prefix_width, ' ');
+    const vector<string> lines = wrap_words(
+            description, report_width - prefix_width);
+    output << prefix << lines.front() << "\n";
+    for (size_t index = 1; index < lines.size(); ++index)
+    {
+        output << continuation << lines[index] << "\n";
+    }
+}
+
+void print_rubric_item(ostream &output, const Item &item, double base_score,
+                       size_t report_width)
+{
+    const string prefix = "\t " + display_id(item.get_id()) + " [" +
+                          format_score(base_score) + "] ";
+    print_wrapped(output, prefix, item.get_description(), report_width);
+}
 }
 
 const string &Rubric::get_student_name() const
@@ -498,60 +581,62 @@ void Rubric::write_raw_note(ostream &raw_note_file) const
     }
 }
 
-void Rubric::print(ostream &output) const
+void Rubric::print(ostream &output, size_t report_width) const
 {
     for (const auto &criterion: criteria)
     {
-        output << display_id(criterion.get_id()) << " [" << fixed
-               << setprecision(2) << criterion.get_base_score() << "]"
-               << criterion.get_description() << "\n";
+        print_rubric_item(output, criterion, criterion.get_base_score(),
+                          report_width);
     }
     output << "\nTotal: " << fixed << setprecision(2) << get_base_score() << "\n";
 }
 
-void Rubric::print_feedback(ostream &output) const
+void Rubric::print_feedback(ostream &output, size_t report_width) const
 {
-    output << "======================== RUBRICA ========================\n";
-    output << "Alumno: " << student_name << "\n\n";
-    output << "CRITERIOS:\n" << string(100, '=') << "\n";
-    output << left << setw(8) << "ID" << right << setw(10) << "Base"
-           << setw(12) << "Obtenido" << string(5, ' ')
-           << left << "Descripcion\n" << string(100, '-') << "\n";
+    const string strong_separator(report_width, '=');
+    const string separator(report_width, '-');
+    output << strong_separator << "\nRUBRICA\n" << strong_separator << "\n";
+    print_wrapped(output, "Alumno: ", student_name, report_width);
+    output << "\nCRITERIOS:\n" << separator << "\n";
 
     double criteria_total = 0.0;
     for (const auto &criterion: criteria)
     {
-        criterion.print(output);
+        print_rubric_item(output, criterion, criterion.get_base_score(),
+                          report_width);
+        output << "\t Obtenido: " << fixed << setprecision(2)
+               << criterion.get_achieved_score() << "\n\n";
         criteria_total += criterion.get_achieved_score();
     }
-    output << string(100, '-') << "\n";
+    output << separator << "\n";
     output << "Puntaje obtenido: " << fixed << setprecision(2)
            << criteria_total << "\n\n";
 
-    output << "DESCUENTOS:\n" << string(100, '=') << "\n";
-    output << left << setw(8) << "ID" << right << setw(10) << "Base"
-           << setw(12) << "Descontado" << string(5, ' ')
-           << left << "Descripcion\n" << string(100, '-') << "\n";
+    output << "DESCUENTOS:\n" << separator << "\n";
 
     double deduction_total = 0.0;
     for (const auto &deduction: deductions)
     {
-        deduction.print(output);
+        print_rubric_item(output, deduction,
+                          deduction.get_base_deduct_score(), report_width);
+        output << "\t Descontado: " << fixed << setprecision(2)
+               << deduction.get_achieved_deduct_score() << "\n\n";
         deduction_total += deduction.get_achieved_deduct_score();
     }
-    output << string(100, '-') << "\n";
+    output << separator << "\n";
     output << "Descuentos obtenidos: " << fixed << setprecision(2)
            << deduction_total << "\n\n";
 
-    output << "OBSERVACIONES:\n" << string(100, '=') << "\n";
+    output << "OBSERVACIONES:\n" << separator << "\n";
     for (const auto &observation: observations)
     {
-        observation.print(output);
+        print_wrapped(output, "\t - ", observation.get_description(),
+                      report_width);
     }
-    output << string(100, '-') << "\n\n";
+    output << separator << "\n\n";
     output << "NOTA FINAL: " << fixed << setprecision(2)
            << get_achieved_score() << "\n";
-    output << "========================================================\n";
+    output << strong_separator << "\n";
 }
 
 void Rubric::add_observation(const Observation &observation)

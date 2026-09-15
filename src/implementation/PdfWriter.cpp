@@ -2,9 +2,6 @@
 
 namespace
 {
-constexpr size_t MAX_CHARACTERS_PER_LINE = 105;
-constexpr size_t LINES_PER_PAGE = 68;
-
 string to_win_ansi(const string &utf8)
 {
     string result;
@@ -64,7 +61,7 @@ string to_win_ansi(const string &utf8)
     return result;
 }
 
-vector<string> wrap_lines(const string &text)
+vector<string> wrap_lines(const string &text, size_t report_width)
 {
     vector<string> result;
     istringstream input(to_win_ansi(text));
@@ -76,12 +73,12 @@ vector<string> wrap_lines(const string &text)
         {
             line.pop_back();
         }
-        while (line.size() > MAX_CHARACTERS_PER_LINE)
+        while (line.size() > report_width)
         {
-            size_t split_at = line.rfind(' ', MAX_CHARACTERS_PER_LINE);
-            if (split_at == string::npos or split_at < MAX_CHARACTERS_PER_LINE / 2)
+            size_t split_at = line.rfind(' ', report_width);
+            if (split_at == string::npos or split_at < report_width / 2)
             {
-                split_at = MAX_CHARACTERS_PER_LINE;
+                split_at = report_width;
             }
             result.push_back(line.substr(0, split_at));
             const size_t next = line.find_first_not_of(' ', split_at);
@@ -113,10 +110,12 @@ string escape_pdf_string(const string &line)
     return escaped;
 }
 
-string page_stream(const vector<string> &lines, size_t begin, size_t end)
+string page_stream(const vector<string> &lines, size_t begin, size_t end,
+                   double font_size, double line_height)
 {
     ostringstream stream;
-    stream << "BT\n/F1 8 Tf\n10 TL\n36 756 Td\n";
+    stream << fixed << setprecision(2) << "BT\n/F1 " << font_size
+           << " Tf\n" << line_height << " TL\n36 756 Td\n";
     for (size_t index = begin; index < end; ++index)
     {
         stream << "(" << escape_pdf_string(lines[index]) << ") Tj\nT*\n";
@@ -126,15 +125,20 @@ string page_stream(const vector<string> &lines, size_t begin, size_t end)
 }
 }
 
-void write_pdf(ostream &output, const string &text)
+void write_pdf(ostream &output, const string &text, size_t report_width)
 {
-    vector<string> lines = wrap_lines(text);
+    vector<string> lines = wrap_lines(text, report_width);
     if (lines.empty())
     {
         lines.emplace_back();
     }
+    const double width = static_cast<double>(report_width);
+    const double font_size = min(10.0, 540.0 / (0.6 * width));
+    const double line_height = font_size + 2.0;
+    const size_t lines_per_page = max(
+            static_cast<size_t>(1), static_cast<size_t>(720.0 / line_height));
     const size_t page_count =
-            (lines.size() + LINES_PER_PAGE - 1) / LINES_PER_PAGE;
+            (lines.size() + lines_per_page - 1) / lines_per_page;
     const size_t object_count = 3 + page_count * 2;
     vector<string> objects(object_count + 1);
 
@@ -154,9 +158,10 @@ void write_pdf(ostream &output, const string &text)
     {
         const size_t page_object = 4 + page * 2;
         const size_t content_object = page_object + 1;
-        const size_t begin = page * LINES_PER_PAGE;
-        const size_t end = min(lines.size(), begin + LINES_PER_PAGE);
-        const string content = page_stream(lines, begin, end);
+        const size_t begin = page * lines_per_page;
+        const size_t end = min(lines.size(), begin + lines_per_page);
+        const string content = page_stream(
+                lines, begin, end, font_size, line_height);
 
         ostringstream page_definition;
         page_definition << "<< /Type /Page /Parent 2 0 R "

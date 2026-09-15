@@ -42,8 +42,8 @@ public:
     void read_rubric(istream &rubric_file);
     void read_raw_note(istream &raw_note_file);
     void write_raw_note(ostream &raw_note_file) const;
-    void print(ostream &output) const;
-    void print_feedback(ostream &output) const;
+    void print(ostream &output, size_t report_width) const;
+    void print_feedback(ostream &output, size_t report_width) const;
 
     //observations selected for one student
     void add_observation(const Observation &observation);

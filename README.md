@@ -18,6 +18,7 @@ Build and run it from the repository root:
 cmake -S . -B build
 cmake --build build
 ./build/calification_program --eval prog2/lab1
+./build/calification_program --eval prog2/lab1 ---report_widith 85
 ```
 
 Automatic project extraction uses the `unzip` command, which must be available
@@ -25,6 +26,11 @@ on the machine running the program.
 
 The program also finds `data/` by walking up from the current directory, so it
 can be launched from `build/` with the same evaluation argument.
+
+The default report width is 85 characters. `---report_widith` changes the
+terminal rubric and PDF width; `--report-width` is also accepted. Rubric item
+descriptions are word-wrapped and their continuation lines align below the
+first description line.
 
 ## Input formats
 
