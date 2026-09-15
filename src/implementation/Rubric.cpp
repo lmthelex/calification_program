@@ -270,9 +270,9 @@ const vector<Observation> &Rubric::get_observations() const
     return observations;
 }
 
-Criterion *Rubric::find_criterion(const string &id)
+Criterion *Rubric::find_criterion(int numeric_id)
 {
-    const string wanted = normalize_id(id);
+    const string wanted = Criterion::format_id(numeric_id);
     for (auto &criterion: criteria)
     {
         if (criterion.get_id() == wanted)
@@ -281,6 +281,18 @@ Criterion *Rubric::find_criterion(const string &id)
         }
     }
     return nullptr;
+}
+
+Criterion *Rubric::find_criterion(const string &id)
+{
+    try
+    {
+        return find_criterion(Criterion::parse_id(normalize_id(id)));
+    }
+    catch (const invalid_argument &)
+    {
+        return nullptr;
+    }
 }
 
 Deduction *Rubric::find_deduction(const string &id)
@@ -387,11 +399,22 @@ void Rubric::read_rubric(istream &rubric_file)
                 throw runtime_error("Criterion " + item.id +
                                     " cannot have a negative base score");
             }
+            int numeric_id = 0;
+            try
+            {
+                numeric_id = Criterion::parse_id(item.id);
+                item.id = Criterion::format_id(numeric_id);
+            }
+            catch (const invalid_argument &error)
+            {
+                throw runtime_error("Invalid criterion id on rubric line " +
+                                    to_string(line_number) + ": " + error.what());
+            }
             if (!criterion_ids.insert(item.id).second)
             {
                 throw runtime_error("Duplicate criterion id: " + item.id);
             }
-            criteria.emplace_back(item.id, item.description, item.base_score);
+            criteria.emplace_back(numeric_id, item.description, item.base_score);
         }
         else
         {
@@ -502,18 +525,22 @@ void Rubric::read_raw_note(istream &raw_note_file)
             {
                 throw runtime_error("Unknown criterion in raw_note.txt: " + id);
             }
-            if (!read_criteria.insert(id).second)
+            const string canonical_id = criterion->get_id();
+            if (!read_criteria.insert(canonical_id).second)
             {
-                throw runtime_error("Duplicate criterion in raw_note.txt: " + id);
+                throw runtime_error("Duplicate criterion in raw_note.txt: " +
+                                    canonical_id);
             }
             if (abs(raw_base - criterion->get_base_score()) > 0.0001)
             {
-                throw runtime_error("Base score changed for criterion " + id);
+                throw runtime_error("Base score changed for criterion " +
+                                    canonical_id);
             }
             if (!fields[2].empty())
             {
                 criterion->restore_achieved_score(parse_number(
-                        fields[2], "criterion " + id + " in raw_note.txt"));
+                        fields[2], "criterion " + canonical_id +
+                                   " in raw_note.txt"));
             }
         }
         else

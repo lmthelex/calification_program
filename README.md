@@ -35,7 +35,10 @@ first description line.
 ## Input formats
 
 `rubric.txt` contains criteria and deductions. Criterion base scores must total
-exactly 20.00 or startup fails.
+exactly 20.00 or startup fails. Criterion IDs must always be positive numbers,
+even though they are stored internally as strings. They are normalized to at
+least two digits for storage and display, so IDs `1` and `01` both become `01`.
+Deduction IDs remain strings.
 
 ```text
 Puntaje
@@ -73,7 +76,9 @@ after every grading action. A student is `BLANK` until an action is recorded,
 `INCOMPLETE` while some criteria remain ungraded, and `READY` when every
 criterion has a score. In the grading screen, `<` moves forward, `>` moves
 backward, and `cod` prompts for a direct student-code jump. The list is
-circular; use `q` to return to the main menu.
+circular; use `q` to return to the main menu. Enter a criterion number directly
+to grade it—there is no preceding `c` command. For example, entering `1` shows
+and grades criterion `01`.
 
 At every startup, existing `projects/**/raw_note.txt` files are synchronized
 with the loaded rubric. Only the second column containing each base score is

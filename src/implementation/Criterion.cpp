@@ -4,6 +4,50 @@
 
 #include "../headers/Criterion.hpp"
 
+int Criterion::parse_id(const string &id)
+{
+    if (id.empty() or !all_of(id.begin(), id.end(), [](unsigned char character)
+    {
+        return isdigit(character);
+    }))
+    {
+        throw invalid_argument("Criterion id must contain only digits");
+    }
+
+    size_t read = 0;
+    unsigned long numeric_id = 0;
+    try
+    {
+        numeric_id = stoul(id, &read);
+    }
+    catch (const exception &)
+    {
+        throw invalid_argument("Criterion id is outside the supported range");
+    }
+    if (read != id.size() or numeric_id == 0 or
+        numeric_id > static_cast<unsigned long>(numeric_limits<int>::max()))
+    {
+        throw invalid_argument("Criterion id must be a positive integer");
+    }
+    return static_cast<int>(numeric_id);
+}
+
+string Criterion::format_id(int numeric_id)
+{
+    if (numeric_id <= 0)
+    {
+        throw invalid_argument("Criterion id must be a positive integer");
+    }
+    ostringstream formatted;
+    formatted << setw(2) << setfill('0') << numeric_id;
+    return formatted.str();
+}
+
+int Criterion::get_numeric_id() const
+{
+    return parse_id(id);
+}
+
 //getters and setters
 void Criterion::set_achieved_score(double achieved_)
 {

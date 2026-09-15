@@ -194,16 +194,28 @@ void CalificationProgram::synchronize_raw_note(const path &raw_note_path) const
 
                 if (section == Section::CRITERIA)
                 {
-                    const auto found = find_if(
-                            rubric.get_criteria().begin(),
-                            rubric.get_criteria().end(),
-                            [&id](const Criterion &criterion)
+                    optional<int> numeric_id;
+                    try
                     {
-                        return criterion.get_id() == id;
-                    });
-                    if (found != rubric.get_criteria().end())
+                        numeric_id = Criterion::parse_id(id);
+                    }
+                    catch (const invalid_argument &)
                     {
-                        base_score = found->get_base_score();
+                        numeric_id.reset();
+                    }
+                    if (numeric_id)
+                    {
+                        const auto found = find_if(
+                                rubric.get_criteria().begin(),
+                                rubric.get_criteria().end(),
+                                [&numeric_id](const Criterion &criterion)
+                        {
+                            return criterion.get_numeric_id() == *numeric_id;
+                        });
+                        if (found != rubric.get_criteria().end())
+                        {
+                            base_score = found->get_base_score();
+                        }
                     }
                 }
                 else
@@ -458,21 +470,17 @@ void CalificationProgram::show_students()
     cout << "___\n";
 }
 
-void CalificationProgram::calificate_criterion(Student &student)
+void CalificationProgram::calificate_criterion(Student &student,
+                                               int criterion_id)
 {
-    cout << "Criterion choosen: " << flush;
-    string id;
-    if (!getline(cin, id))
-    {
-        return;
-    }
-
-    Criterion *criterion = student.get_calification().find_criterion(trim(id));
+    Criterion *criterion = student.get_calification().find_criterion(criterion_id);
     if (criterion == nullptr)
     {
-        cout << "Error: Criterion does not exist.\n";
+        cout << "Error: Criterion " << Criterion::format_id(criterion_id)
+             << " does not exist.\n";
         return;
     }
+    cout << "Criterion choosen: " << criterion->get_id() << "\n";
     cout << "\t" << criterion->get_description() << "\n";
 
     while (cin)
@@ -635,18 +643,14 @@ void CalificationProgram::calificate_students()
 
         while (cin)
         {
-            cout << "Option (c,d,o)(<,>,cod)(help): " << flush;
+            cout << "Option (criterion id,d,o)(<,>,cod)(help): " << flush;
             string option;
             if (!getline(cin, option))
             {
                 return;
             }
             option = trim(option);
-            if (option == "c")
-            {
-                calificate_criterion(student);
-            }
-            else if (option == "d")
+            if (option == "d")
             {
                 calificate_deduction(student);
             }
@@ -699,7 +703,7 @@ void CalificationProgram::calificate_students()
             }
             else if (option == "help")
             {
-                cout << "c - Criteria calification\n";
+                cout << "number - Criteria calification (1 selects 01)\n";
                 cout << "d - Discount applied\n";
                 cout << "o - Observation registration\n";
                 cout << "< - Next student (forward)\n";
@@ -709,21 +713,15 @@ void CalificationProgram::calificate_students()
             }
             else
             {
-                const auto found = find_if(
-                        pending_students.begin(), pending_students.end(),
-                        [&option, this](size_t index)
+                try
                 {
-                    return students[index].get_code() == option;
-                });
-                if (found == pending_students.end())
-                {
-                    cout << "Error: Unknown calification option or student code.\n";
+                    const int criterion_id = Criterion::parse_id(option);
+                    calificate_criterion(student, criterion_id);
                 }
-                else
+                catch (const invalid_argument &error)
                 {
-                    current = static_cast<size_t>(
-                            distance(pending_students.begin(), found));
-                    break;
+                    cout << "Error: " << error.what()
+                         << ". Enter a criterion number or a listed option.\n";
                 }
             }
         }

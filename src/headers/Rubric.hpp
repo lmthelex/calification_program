@@ -31,6 +31,7 @@ public:
     const vector<Criterion> &get_criteria() const;
     const vector<Deduction> &get_deductions() const;
     const vector<Observation> &get_observations() const;
+    Criterion *find_criterion(int numeric_id);
     Criterion *find_criterion(const string &id);
     Deduction *find_deduction(const string &id);
 

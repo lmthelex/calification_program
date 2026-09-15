@@ -26,7 +26,7 @@ private:
     void print_menu() const;
     void show_students();
     void calificate_students();
-    void calificate_criterion(Student &student);
+    void calificate_criterion(Student &student, int criterion_id);
     void calificate_deduction(Student &student);
     void register_observation(Student &student);
     void write_feedback();

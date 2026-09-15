@@ -16,11 +16,15 @@ protected:
 
 public:
     //constructor and destructure
-    Criterion(string id_, string description_, const double base_score_)
-        : Item(std::move(id_), std::move(description_))
+    Criterion(int numeric_id, string description_, const double base_score_)
+        : Item(format_id(numeric_id), std::move(description_))
         , base_score(base_score_)
         , achieved_score(nullopt) {};
     ~Criterion() override = default;
+
+    static int parse_id(const string &id);
+    static string format_id(int numeric_id);
+    int get_numeric_id() const;
 
     //getters and setters
     void set_achieved_score(double achieved_);
