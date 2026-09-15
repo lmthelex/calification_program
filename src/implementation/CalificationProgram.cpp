@@ -643,7 +643,7 @@ void CalificationProgram::calificate_students()
 
         while (cin)
         {
-            cout << "Option (criterion id,d,o)(<,>,cod)(help): " << flush;
+            cout << "Option (criterion id,d,o,show)(<,>,cod)(help): " << flush;
             string option;
             if (!getline(cin, option))
             {
@@ -657,6 +657,12 @@ void CalificationProgram::calificate_students()
             else if (option == "o")
             {
                 register_observation(student);
+            }
+            else if (option == "show")
+            {
+                cout << "___\n";
+                student.get_calification().print_current_scores(cout);
+                cout << "___\n";
             }
             else if (option == "<")
             {
@@ -706,6 +712,7 @@ void CalificationProgram::calificate_students()
                 cout << "number - Criteria calification (1 selects 01)\n";
                 cout << "d - Discount applied\n";
                 cout << "o - Observation registration\n";
+                cout << "show - Show current base and achieved scores\n";
                 cout << "< - Next student (forward)\n";
                 cout << "> - Previous student (backward)\n";
                 cout << "cod - Go directly to a student code\n";

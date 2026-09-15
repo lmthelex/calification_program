@@ -78,7 +78,8 @@ criterion has a score. In the grading screen, `<` moves forward, `>` moves
 backward, and `cod` prompts for a direct student-code jump. The list is
 circular; use `q` to return to the main menu. Enter a criterion number directly
 to grade it—there is no preceding `c` command. For example, entering `1` shows
-and grades criterion `01`.
+and grades criterion `01`. Enter `show` to display every current base and
+achieved score; criteria or deductions that have not been graded display `-`.
 
 At every startup, existing `projects/**/raw_note.txt` files are synchronized
 with the loaded rubric. Only the second column containing each base score is

@@ -618,6 +618,50 @@ void Rubric::print(ostream &output, size_t report_width) const
     output << "\nTotal: " << fixed << setprecision(2) << get_base_score() << "\n";
 }
 
+void Rubric::print_current_scores(ostream &output) const
+{
+    output << "Current scores:\n";
+    output << "Criteria:\n";
+    output << left << setw(10) << "ID" << right << setw(10) << "Base"
+           << setw(14) << "Achieved\n";
+    for (const auto &criterion: criteria)
+    {
+        output << left << setw(10) << criterion.get_id()
+               << right << setw(10) << fixed << setprecision(2)
+               << criterion.get_base_score() << setw(14);
+        if (criterion.has_achieved_score())
+        {
+            output << criterion.get_achieved_score();
+        }
+        else
+        {
+            output << "-";
+        }
+        output << "\n";
+    }
+
+    output << "\nDeductions:\n";
+    output << left << setw(10) << "ID" << right << setw(10) << "Base"
+           << setw(14) << "Achieved\n";
+    for (const auto &deduction: deductions)
+    {
+        output << left << setw(10) << deduction.get_id()
+               << right << setw(10) << fixed << setprecision(2)
+               << deduction.get_base_deduct_score() << setw(14);
+        if (deduction.has_achieved_deduct_score())
+        {
+            output << deduction.get_achieved_deduct_score();
+        }
+        else
+        {
+            output << "-";
+        }
+        output << "\n";
+    }
+    output << "\nCurrent total: " << fixed << setprecision(2)
+           << get_achieved_score() << "\n";
+}
+
 void Rubric::print_feedback(ostream &output, size_t report_width) const
 {
     const string strong_separator(report_width, '=');
